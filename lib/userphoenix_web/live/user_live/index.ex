@@ -30,7 +30,7 @@ defmodule UserphoenixWeb.UserLive.Index do
         </:action>
         <:action :let={{id, user}}>
           <.link
-            phx-click={JS.push("delete", value: %{id: user.id}) |> hide("##{id}")}
+            phx-click={JS.push("delete", value: %{uuid: user.uuid}) |> hide("##{id}")}
             data-confirm="Are you sure?"
           >
             Delete
@@ -50,8 +50,8 @@ defmodule UserphoenixWeb.UserLive.Index do
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    user = Users.get_user!(id)
+  def handle_event("delete", %{"uuid" => uuid}, socket) do
+    user = Users.get_user_by_uuid!(uuid)
     {:ok, _} = Users.delete_user(user)
 
     {:noreply, stream_delete(socket, :users, user)}

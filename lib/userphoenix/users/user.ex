@@ -2,7 +2,10 @@ defmodule Userphoenix.Users.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Phoenix.Param, key: :uuid}
+
   schema "users" do
+    field :uuid, Ecto.UUID, autogenerate: true
     field :name, :string
     field :token_hash, :string
     field :mnemonic_hash, :string

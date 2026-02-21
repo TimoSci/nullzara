@@ -36,8 +36,8 @@ defmodule UserphoenixWeb.UserLive.Form do
   defp return_to("show"), do: "show"
   defp return_to(_), do: "index"
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    user = Users.get_user!(id)
+  defp apply_action(socket, :edit, %{"uuid" => uuid}) do
+    user = Users.get_user_by_uuid!(uuid)
 
     socket
     |> assign(:page_title, "Edit User")

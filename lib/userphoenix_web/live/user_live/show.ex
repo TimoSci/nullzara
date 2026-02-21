@@ -28,10 +28,10 @@ defmodule UserphoenixWeb.UserLive.Show do
   end
 
   @impl true
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(%{"uuid" => uuid}, _session, socket) do
     {:ok,
      socket
      |> assign(:page_title, "Show User")
-     |> assign(:user, Users.get_user!(id))}
+     |> assign(:user, Users.get_user_by_uuid!(uuid))}
   end
 end

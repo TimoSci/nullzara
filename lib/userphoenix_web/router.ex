@@ -42,18 +42,18 @@ defmodule UserphoenixWeb.Router do
   scope "/", UserphoenixWeb do
     pipe_through [:browser, :require_auth]
 
-    get "/user/:id/dashboard", DashboardController, :show
-    get "/user/:id/settings", SettingsController, :show
-    put "/user/:id/settings", SettingsController, :update
-    post "/user/:id/settings/token", SettingsController, :regenerate_token
-    delete "/user/:id/settings", SettingsController, :delete
+    get "/user/:uuid/dashboard", DashboardController, :show
+    get "/user/:uuid/settings", SettingsController, :show
+    put "/user/:uuid/settings", SettingsController, :update
+    post "/user/:uuid/settings/token", SettingsController, :regenerate_token
+    delete "/user/:uuid/settings", SettingsController, :delete
 
     live_session :authenticated,
       on_mount: [{UserphoenixWeb.Plugs.Auth, :require_authenticated_user}] do
       live "/users", UserLive.Index, :index
       live "/users/new", UserLive.Form, :new
-      live "/users/:id", UserLive.Show, :show
-      live "/users/:id/edit", UserLive.Form, :edit
+      live "/users/:uuid", UserLive.Show, :show
+      live "/users/:uuid/edit", UserLive.Form, :edit
     end
   end
 

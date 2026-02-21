@@ -23,6 +23,13 @@ defmodule Userphoenix.Users do
   def get_user!(id), do: Repo.get!(User, id)
 
   @doc """
+  Gets a single user by UUID.
+
+  Raises `Ecto.NoResultsError` if the User does not exist.
+  """
+  def get_user_by_uuid!(uuid), do: Repo.get_by!(User, uuid: uuid)
+
+  @doc """
   Gets a single user by id. Returns nil if not found.
   """
   def get_user(id), do: Repo.get(User, id)
