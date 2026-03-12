@@ -46,84 +46,84 @@ defmodule NullzaraWeb.PasskeyLive do
       </div>
 
       <script :type={Phoenix.LiveView.ColocatedHook} name=".PasskeyHook">
-      export default {
-        mounted() {
-          this.handleEvent("registration_challenge", async (data) => {
-            try {
-              const challenge = base64urlToBuffer(data.challenge);
-              const userId = base64urlToBuffer(data.user_id);
+        export default {
+          mounted() {
+            this.handleEvent("registration_challenge", async (data) => {
+              try {
+                const challenge = base64urlToBuffer(data.challenge);
+                const userId = base64urlToBuffer(data.user_id);
 
-              const credential = await navigator.credentials.create({
-                publicKey: {
-                  challenge: challenge,
-                  rp: { name: data.rp_name, id: data.rp_id },
-                  user: {
-                    id: userId,
-                    name: data.user_name,
-                    displayName: data.user_display_name
-                  },
-                  pubKeyCredParams: [
-                    { alg: -7, type: "public-key" },
-                    { alg: -257, type: "public-key" }
-                  ],
-                  authenticatorSelection: {
-                    residentKey: "preferred",
-                    userVerification: "preferred"
-                  },
-                  timeout: 60000,
-                  attestation: "none"
-                }
-              });
+                const credential = await navigator.credentials.create({
+                  publicKey: {
+                    challenge: challenge,
+                    rp: { name: data.rp_name, id: data.rp_id },
+                    user: {
+                      id: userId,
+                      name: data.user_name,
+                      displayName: data.user_display_name
+                    },
+                    pubKeyCredParams: [
+                      { alg: -7, type: "public-key" },
+                      { alg: -257, type: "public-key" }
+                    ],
+                    authenticatorSelection: {
+                      residentKey: "preferred",
+                      userVerification: "preferred"
+                    },
+                    timeout: 60000,
+                    attestation: "none"
+                  }
+                });
 
-              this.pushEvent("registration_response", {
-                attestation_object: bufferToBase64url(credential.response.attestationObject),
-                client_data_json: bufferToBase64url(credential.response.clientDataJSON),
-                raw_id: bufferToBase64url(credential.rawId)
-              });
-            } catch (e) {
-              this.pushEvent("webauthn_error", { message: e.message || "Registration cancelled" });
-            }
-          });
+                this.pushEvent("registration_response", {
+                  attestation_object: bufferToBase64url(credential.response.attestationObject),
+                  client_data_json: bufferToBase64url(credential.response.clientDataJSON),
+                  raw_id: bufferToBase64url(credential.rawId)
+                });
+              } catch (e) {
+                this.pushEvent("webauthn_error", { message: e.message || "Registration cancelled" });
+              }
+            });
 
-          this.handleEvent("authentication_challenge", async (data) => {
-            try {
-              const options = {
-                publicKey: {
-                  challenge: base64urlToBuffer(data.challenge),
-                  rpId: data.rp_id,
-                  userVerification: "preferred",
-                  timeout: 60000
-                }
-              };
+            this.handleEvent("authentication_challenge", async (data) => {
+              try {
+                const options = {
+                  publicKey: {
+                    challenge: base64urlToBuffer(data.challenge),
+                    rpId: data.rp_id,
+                    userVerification: "preferred",
+                    timeout: 60000
+                  }
+                };
 
-              const assertion = await navigator.credentials.get(options);
+                const assertion = await navigator.credentials.get(options);
 
-              this.pushEvent("authentication_response", {
-                credential_id: bufferToBase64url(assertion.rawId),
-                authenticator_data: bufferToBase64url(assertion.response.authenticatorData),
-                client_data_json: bufferToBase64url(assertion.response.clientDataJSON),
-                signature: bufferToBase64url(assertion.response.signature)
-              });
-            } catch (e) {
-              this.pushEvent("webauthn_error", { message: e.message || "Authentication cancelled" });
-            }
-          });
+                this.pushEvent("authentication_response", {
+                  credential_id: bufferToBase64url(assertion.rawId),
+                  authenticator_data: bufferToBase64url(assertion.response.authenticatorData),
+                  client_data_json: bufferToBase64url(assertion.response.clientDataJSON),
+                  signature: bufferToBase64url(assertion.response.signature)
+                });
+              } catch (e) {
+                this.pushEvent("webauthn_error", { message: e.message || "Authentication cancelled" });
+              }
+            });
+          }
         }
-      }
 
-      function base64urlToBuffer(base64url) {
-        const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-        const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
-        const binary = atob(base64 + pad);
-        return Uint8Array.from(binary, c => c.charCodeAt(0)).buffer;
-      }
+        function base64urlToBuffer(base64url) {
+          const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+          const pad = base64.length % 4 === 0 ? '' : '='.repeat(4 - (base64.length % 4));
+          const binary = atob(base64 + pad);
+          return Uint8Array.from(binary, c => c.charCodeAt(0)).buffer;
+        }
 
-      function bufferToBase64url(buffer) {
-        const bytes = new Uint8Array(buffer);
-        let binary = '';
-        for (const b of bytes) binary += String.fromCharCode(b);
-        return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      }
+        function bufferToBase64url(buffer) {
+          const bytes = new Uint8Array(buffer);
+          let binary = '';
+          for (const b of bytes) binary += String.fromCharCode(b);
+          return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
       </script>
     </Layouts.app>
     """

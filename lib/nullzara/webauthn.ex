@@ -24,7 +24,13 @@ defmodule Nullzara.Webauthn do
     Wax.register(attestation_object, client_data_json, challenge)
   end
 
-  def verify_authentication(credential_id, authenticator_data, signature, client_data_json, challenge) do
+  def verify_authentication(
+        credential_id,
+        authenticator_data,
+        signature,
+        client_data_json,
+        challenge
+      ) do
     case get_credential_by_id(credential_id) do
       {:ok, credential} ->
         cose_key = restore_cose_key(credential.public_key)
