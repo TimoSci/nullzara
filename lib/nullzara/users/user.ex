@@ -10,6 +10,8 @@ defmodule Nullzara.Users.User do
     field :raw_token, :string, virtual: true
     field :raw_login_token, :string, virtual: true
 
+    has_many :webauthn_credentials, Nullzara.Webauthn.Credential
+
     timestamps(type: :utc_datetime)
   end
 
