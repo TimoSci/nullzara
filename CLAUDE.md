@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Userphoenix is a Phoenix 1.8.3 web application (Elixir ~> 1.15) using LiveView, Ecto/PostgreSQL, Tailwind CSS v4 with vendored daisyUI, and Bandit as the HTTP server. No npm/package.json — JS deps are vendored in `assets/vendor/` and esbuild/tailwind are managed via Mix.
+Nullzara is a Phoenix 1.8.3 web application (Elixir ~> 1.15) using LiveView, Ecto/PostgreSQL, Tailwind CSS v4 with vendored daisyUI, and Bandit as the HTTP server. No npm/package.json — JS deps are vendored in `assets/vendor/` and esbuild/tailwind are managed via Mix.
 
 ## Common Commands
 
@@ -34,12 +34,12 @@ mix ecto.reset                                # Drop + create + migrate + seed
 
 ## Architecture
 
-- **Domain contexts** live in `lib/userphoenix/` (e.g., `Userphoenix.Accounts`)
-- **Web layer** lives in `lib/userphoenix_web/` — controllers, LiveViews, components
-- **Shared UI components** are in `lib/userphoenix_web/components/core_components.ex` — imported app-wide via `html_helpers/0` in `userphoenix_web.ex`
-- **Layouts** are in `lib/userphoenix_web/components/layouts.ex` — `<Layouts.app>` wraps all LiveView templates
-- **Router**: `lib/userphoenix_web/router.ex` — the default `scope "/", UserphoenixWeb` provides a module alias prefix, so routes within it should not repeat `UserphoenixWeb`
-- **Repo**: `Userphoenix.Repo` (PostgreSQL)
+- **Domain contexts** live in `lib/nullzara/` (e.g., `Nullzara.Accounts`)
+- **Web layer** lives in `lib/nullzara_web/` — controllers, LiveViews, components
+- **Shared UI components** are in `lib/nullzara_web/components/core_components.ex` — imported app-wide via `html_helpers/0` in `nullzara_web.ex`
+- **Layouts** are in `lib/nullzara_web/components/layouts.ex` — `<Layouts.app>` wraps all LiveView templates
+- **Router**: `lib/nullzara_web/router.ex` — the default `scope "/", NullzaraWeb` provides a module alias prefix, so routes within it should not repeat `NullzaraWeb`
+- **Repo**: `Nullzara.Repo` (PostgreSQL)
 
 ### Dev-only routes
 
@@ -69,5 +69,5 @@ Required env vars: `DATABASE_URL`, `SECRET_KEY_BASE`, `PHX_HOST`
 
 ```bash
 mix assets.deploy                          # Minify + digest
-PHX_SERVER=true bin/userphoenix start      # After mix release
+PHX_SERVER=true bin/nullzara start      # After mix release
 ```

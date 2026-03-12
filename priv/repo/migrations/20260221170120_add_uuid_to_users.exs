@@ -1,4 +1,4 @@
-defmodule Userphoenix.Repo.Migrations.AddUuidToUsers do
+defmodule Nullzara.Repo.Migrations.AddUuidToUsers do
   use Ecto.Migration
 
   def change do

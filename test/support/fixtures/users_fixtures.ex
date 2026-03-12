@@ -1,7 +1,7 @@
-defmodule Userphoenix.UsersFixtures do
+defmodule Nullzara.UsersFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Userphoenix.Users` context.
+  entities via the `Nullzara.Users` context.
   """
 
   @doc """
@@ -13,7 +13,7 @@ defmodule Userphoenix.UsersFixtures do
       |> Enum.into(%{
         name: "some name"
       })
-      |> Userphoenix.Users.create_user()
+      |> Nullzara.Users.create_user()
 
     user
   end
@@ -27,7 +27,7 @@ defmodule Userphoenix.UsersFixtures do
       |> Enum.into(%{
         name: "some name"
       })
-      |> Userphoenix.Users.create_user_with_token()
+      |> Nullzara.Users.create_user_with_token()
 
     {user, user.raw_token, user.raw_login_token}
   end

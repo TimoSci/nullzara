@@ -1,4 +1,4 @@
-# Userphoenix
+# Nullzara
 
 To start your Phoenix server:
 

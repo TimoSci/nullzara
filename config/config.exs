@@ -7,19 +7,19 @@
 # General application configuration
 import Config
 
-config :userphoenix,
-  ecto_repos: [Userphoenix.Repo],
+config :nullzara,
+  ecto_repos: [Nullzara.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configure the endpoint
-config :userphoenix, UserphoenixWeb.Endpoint,
+config :nullzara, NullzaraWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Bandit.PhoenixAdapter,
   render_errors: [
-    formats: [html: UserphoenixWeb.ErrorHTML, json: UserphoenixWeb.ErrorJSON],
+    formats: [html: NullzaraWeb.ErrorHTML, json: NullzaraWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: Userphoenix.PubSub,
+  pubsub_server: Nullzara.PubSub,
   live_view: [signing_salt: "HKCXRCk9"]
 
 # Configure the mailer
@@ -29,12 +29,12 @@ config :userphoenix, UserphoenixWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :userphoenix, Userphoenix.Mailer, adapter: Swoosh.Adapters.Local
+config :nullzara, Nullzara.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
-  userphoenix: [
+  nullzara: [
     args:
       ~w(js/app.js --bundle --target=es2022 --outdir=../priv/static/assets/js --external:/fonts/* --external:/images/* --alias:@=.),
     cd: Path.expand("../assets", __DIR__),
@@ -44,7 +44,7 @@ config :esbuild,
 # Configure tailwind (the version is required)
 config :tailwind,
   version: "4.1.12",
-  userphoenix: [
+  nullzara: [
     args: ~w(
       --input=assets/css/app.css
       --output=priv/static/assets/css/app.css

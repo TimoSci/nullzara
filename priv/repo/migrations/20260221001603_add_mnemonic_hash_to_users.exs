@@ -1,4 +1,4 @@
-defmodule Userphoenix.Repo.Migrations.AddMnemonicHashToUsers do
+defmodule Nullzara.Repo.Migrations.AddMnemonicHashToUsers do
   use Ecto.Migration
 
   def change do
