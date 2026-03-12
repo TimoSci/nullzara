@@ -8,12 +8,14 @@ defmodule NullzaraWeb.Plugs.Auth do
   import Phoenix.Component, only: [assign_new: 3]
 
   alias Nullzara.Users
+  alias Nullzara.Users.User
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
     user_id = get_session(conn, :user_id)
     user = user_id && Users.get_user(user_id)
+    user = maybe_attach_login_token(user, get_session(conn, :login_token))
     assign(conn, :current_user, user)
   end
 
@@ -31,8 +33,13 @@ defmodule NullzaraWeb.Plugs.Auth do
       # Allow magiclink users to authenticate via login token in URL
       is_binary(params["id"]) ->
         case Users.get_user_by_login_token(params["id"]) do
-          {:ok, %{mnemonic_hash: nil} = user} ->
-            {:cont, Phoenix.Component.assign(socket, :current_user, user)}
+          {:ok, user} ->
+            if User.is_magiclink?(user) do
+              user = %{user | raw_login_token: params["id"]}
+              {:cont, Phoenix.Component.assign(socket, :current_user, user)}
+            else
+              {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
+            end
 
           _ ->
             {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
@@ -46,7 +53,14 @@ defmodule NullzaraWeb.Plugs.Auth do
   defp mount_current_user(socket, session) do
     assign_new(socket, :current_user, fn ->
       user_id = session["user_id"]
-      user_id && Users.get_user(user_id)
+      user = user_id && Users.get_user(user_id)
+      maybe_attach_login_token(user, session["login_token"])
     end)
   end
+
+  defp maybe_attach_login_token(%User{mnemonic_hash: nil} = user, token) when is_binary(token) do
+    %{user | raw_login_token: token}
+  end
+
+  defp maybe_attach_login_token(user, _token), do: user
 end

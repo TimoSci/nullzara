@@ -43,7 +43,18 @@ defmodule NullzaraWeb.Layouts do
         <span :if={Phoenix.Flash.get(@flash, :mnemonic)} class="text-base font-bold text-primary">
           Account Created!
         </span>
-        <span :if={@current_user} class="text-sm opacity-70">
+        <span
+          :if={@current_user && Nullzara.Users.User.is_magiclink?(@current_user)}
+          class="text-sm opacity-70"
+        >
+          Signed in via Magiclink as
+          <span class="font-semibold">{Nullzara.Users.User.slug(@current_user)}</span>
+          - Nickname: <span class="font-semibold">{@current_user.name}</span>
+        </span>
+        <span
+          :if={@current_user && !Nullzara.Users.User.is_magiclink?(@current_user)}
+          class="text-sm opacity-70"
+        >
           Signed in as <span class="font-semibold">{Nullzara.Users.User.slug(@current_user)}</span>
           - Nickname: <span class="font-semibold">{@current_user.name}</span>
         </span>

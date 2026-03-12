@@ -43,11 +43,11 @@ defmodule NullzaraWeb.Router do
   scope "/", NullzaraWeb do
     pipe_through [:browser, :require_auth]
 
-    get "/user/:uuid/dashboard", DashboardController, :show
-    get "/user/:uuid/settings", SettingsController, :show
-    put "/user/:uuid/settings", SettingsController, :update
-    post "/user/:uuid/settings/token", SettingsController, :regenerate_token
-    delete "/user/:uuid/settings", SettingsController, :delete
+    get "/user/:id/dashboard", DashboardController, :show
+    get "/user/:id/settings", SettingsController, :show
+    put "/user/:id/settings", SettingsController, :update
+    post "/user/:id/settings/token", SettingsController, :regenerate_token
+    delete "/user/:id/settings", SettingsController, :delete
 
     live_session :authenticated,
       on_mount: [{NullzaraWeb.Plugs.Auth, :require_authenticated_user}] do

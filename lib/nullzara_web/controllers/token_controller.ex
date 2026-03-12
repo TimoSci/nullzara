@@ -12,11 +12,16 @@ defmodule NullzaraWeb.TokenController do
           |> put_session(:user_id, user.id)
           |> configure_session(renew: true)
 
-        conn =
-          if match_type == :mnemonic do
-            put_session(conn, :mnemonic_token, raw_token)
-          else
-            conn
+        {conn, user} =
+          cond do
+            match_type == :mnemonic ->
+              {put_session(conn, :mnemonic_token, raw_token), user}
+
+            Users.User.is_magiclink?(user) ->
+              {put_session(conn, :login_token, raw_token), %{user | raw_login_token: raw_token}}
+
+            true ->
+              {conn, user}
           end
 
         cond do

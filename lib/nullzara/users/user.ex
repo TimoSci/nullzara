@@ -2,8 +2,6 @@ defmodule Nullzara.Users.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Phoenix.Param, key: :uuid}
-
   schema "users" do
     field :uuid, Ecto.UUID, autogenerate: true
     field :name, :string
@@ -28,6 +26,9 @@ defmodule Nullzara.Users.User do
       separator: "-"
     )
   end
+
+  def is_magiclink?(%__MODULE__{mnemonic_hash: nil}), do: true
+  def is_magiclink?(%__MODULE__{}), do: false
 
   @doc false
   def changeset(user, attrs) do
@@ -81,4 +82,9 @@ defmodule Nullzara.Users.User do
   defp hash_token(raw_token) do
     :crypto.hash(:sha256, raw_token) |> Base.encode16(case: :lower)
   end
+end
+
+defimpl Phoenix.Param, for: Nullzara.Users.User do
+  def to_param(%{mnemonic_hash: nil, raw_login_token: token}) when is_binary(token), do: token
+  def to_param(%{uuid: uuid}), do: uuid
 end
