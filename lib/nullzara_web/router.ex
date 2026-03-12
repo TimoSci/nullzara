@@ -36,6 +36,7 @@ defmodule NullzaraWeb.Router do
     pipe_through [:browser, :rate_limited]
 
     post "/", PageController, :create
+    post "/magiclink", PageController, :create_magiclink
     get "/u/:token", TokenController, :verify
   end
 
@@ -52,8 +53,16 @@ defmodule NullzaraWeb.Router do
       on_mount: [{NullzaraWeb.Plugs.Auth, :require_authenticated_user}] do
       live "/users", UserLive.Index, :index
       live "/users/new", UserLive.Form, :new
-      live "/users/:uuid", UserLive.Show, :show
       live "/users/:uuid/edit", UserLive.Form, :edit
+    end
+  end
+
+  scope "/", NullzaraWeb do
+    pipe_through :browser
+
+    live_session :users_show,
+      on_mount: [{NullzaraWeb.Plugs.Auth, :require_authenticated_user}] do
+      live "/users/:id", UserLive.Show, :show
     end
   end
 

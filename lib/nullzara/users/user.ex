@@ -22,6 +22,13 @@ defmodule Nullzara.Users.User do
     )
   end
 
+  def slug(%__MODULE__{mnemonic_hash: nil, token_hash: hash}) when is_binary(hash) do
+    UniqueNamesGenerator.generate([:adjectives, :animals, :names],
+      seed: hash,
+      separator: "-"
+    )
+  end
+
   @doc false
   def changeset(user, attrs) do
     user
@@ -45,6 +52,18 @@ defmodule Nullzara.Users.User do
     |> put_change(:raw_login_token, raw_login_token)
     |> unique_constraint(:token_hash)
     |> unique_constraint(:mnemonic_hash)
+  end
+
+  @doc false
+  def magiclink_changeset(user, attrs) do
+    raw_login_token = Base.encode16(:crypto.strong_rand_bytes(16), case: :lower)
+    login_hash = hash_token(raw_login_token)
+
+    user
+    |> changeset(attrs)
+    |> put_change(:token_hash, login_hash)
+    |> put_change(:raw_login_token, raw_login_token)
+    |> unique_constraint(:token_hash)
   end
 
   @doc false

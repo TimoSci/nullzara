@@ -75,6 +75,29 @@ defmodule Nullzara.Users do
   end
 
   @doc """
+  Creates a magiclink user with only a login token (no mnemonic hash).
+  """
+  def create_magiclink_user(attrs) do
+    %User{}
+    |> User.magiclink_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Gets a user by raw login token. Only matches against token_hash.
+
+  Returns `{:ok, user}` or `{:error, :not_found}`.
+  """
+  def get_user_by_login_token(raw_token) do
+    hash = :crypto.hash(:sha256, raw_token) |> Base.encode16(case: :lower)
+
+    case Repo.get_by(User, token_hash: hash) do
+      nil -> {:error, :not_found}
+      user -> {:ok, user}
+    end
+  end
+
+  @doc """
   Updates a user.
   """
   def update_user(%User{} = user, attrs) do

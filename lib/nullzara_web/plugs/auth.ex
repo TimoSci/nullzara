@@ -21,13 +21,25 @@ defmodule NullzaraWeb.Plugs.Auth do
     {:cont, mount_current_user(socket, session)}
   end
 
-  def on_mount(:require_authenticated_user, _params, session, socket) do
+  def on_mount(:require_authenticated_user, params, session, socket) do
     socket = mount_current_user(socket, session)
 
-    if socket.assigns.current_user do
-      {:cont, socket}
-    else
-      {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
+    cond do
+      socket.assigns.current_user ->
+        {:cont, socket}
+
+      # Allow magiclink users to authenticate via login token in URL
+      is_binary(params["id"]) ->
+        case Users.get_user_by_login_token(params["id"]) do
+          {:ok, %{mnemonic_hash: nil} = user} ->
+            {:cont, Phoenix.Component.assign(socket, :current_user, user)}
+
+          _ ->
+            {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
+        end
+
+      true ->
+        {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
     end
   end
 

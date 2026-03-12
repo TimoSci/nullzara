@@ -19,10 +19,15 @@ defmodule NullzaraWeb.TokenController do
             conn
           end
 
-        if Phoenix.Flash.get(conn.assigns.flash, :mnemonic) do
-          render(conn, :welcome, user: user, token: raw_token)
-        else
-          redirect(conn, to: ~p"/user/#{user}/dashboard")
+        cond do
+          Phoenix.Flash.get(conn.assigns.flash, :mnemonic) ->
+            render(conn, :welcome, user: user, token: raw_token)
+
+          Phoenix.Flash.get(conn.assigns.flash, :magiclink) ->
+            render(conn, :magiclink_welcome, user: user, token: raw_token)
+
+          true ->
+            redirect(conn, to: ~p"/user/#{user}/dashboard")
         end
 
       {:error, :not_found} ->

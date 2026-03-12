@@ -30,4 +30,18 @@ defmodule NullzaraWeb.PageController do
         |> redirect(to: ~p"/")
     end
   end
+
+  def create_magiclink(conn, _params) do
+    case Users.create_magiclink_user(%{name: "Anonymous"}) do
+      {:ok, user} ->
+        conn
+        |> put_flash(:magiclink, user.raw_login_token)
+        |> redirect(to: ~p"/u/#{user.raw_login_token}")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "Could not create account.")
+        |> redirect(to: ~p"/")
+    end
+  end
 end

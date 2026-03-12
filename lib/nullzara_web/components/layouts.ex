@@ -77,6 +77,13 @@ defmodule NullzaraWeb.Layouts do
               </.button>
             </.form>
           </li>
+          <li :if={!@current_user}>
+            <.form for={%{}} action={~p"/magiclink"} method="post">
+              <.button type="submit" variant="primary">
+                <.icon name="hero-link-mini" /> Create Magiclink
+              </.button>
+            </.form>
+          </li>
         </ul>
       </div>
     </header>
