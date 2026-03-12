@@ -26,6 +26,11 @@ config :nullzara, Nullzara.Mailer, adapter: Swoosh.Adapters.Test
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
+# WebAuthn config for tests
+config :wax_,
+  rp_id: "localhost",
+  origin: "http://localhost:4000"
+
 # Rate limiting config for tests (matches default production values)
 config :nullzara, Nullzara.RateLimiter,
   limits: %{

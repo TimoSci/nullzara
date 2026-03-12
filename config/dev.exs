@@ -88,6 +88,11 @@ config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
+# WebAuthn config for development
+config :wax_,
+  rp_id: "localhost",
+  origin: "http://localhost:4000"
+
 # Relaxed rate limits for development
 config :nullzara, Nullzara.RateLimiter,
   limits: %{

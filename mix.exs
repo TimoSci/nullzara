@@ -66,7 +66,8 @@ defmodule Nullzara.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:unique_names_generator, "~> 0.2.0"}
+      {:unique_names_generator, "~> 0.2.0"},
+      {:wax_, "~> 0.7"}
     ]
   end
 

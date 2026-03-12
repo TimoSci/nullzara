@@ -19,6 +19,10 @@ config :nullzara, Nullzara.RateLimiter,
     verify: {10, :timer.minutes(10)}
   }
 
+# Configure WebAuthn (Wax)
+config :wax_,
+  rp_name: "Nullzara"
+
 # Configure the endpoint
 config :nullzara, NullzaraWeb.Endpoint,
   url: [host: "localhost"],
