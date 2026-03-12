@@ -82,6 +82,11 @@ defmodule NullzaraWeb.Layouts do
             </.button>
           </li>
           <li :if={!@current_user}>
+            <.button navigate={~p"/access/passkey"}>
+              <.icon name="hero-finger-print-mini" /> Login with Passkey
+            </.button>
+          </li>
+          <li :if={!@current_user}>
             <.form for={%{}} action={~p"/"} method="post">
               <.button type="submit" variant="primary">
                 <.icon name="hero-user-plus-mini" /> Create Anonymous Account

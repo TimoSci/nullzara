@@ -34,6 +34,8 @@ defmodule NullzaraWeb.Router do
     delete "/logout", PageController, :logout
     live "/access/token", AccessTokenLive
     live "/access/mnemonic", AccessLive
+    live "/access/passkey", PasskeyLive
+    get "/access/passkey/complete", PasskeyController, :complete
   end
 
   scope "/", NullzaraWeb do
