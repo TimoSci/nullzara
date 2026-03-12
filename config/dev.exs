@@ -88,5 +88,12 @@ config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
 
+# Relaxed rate limits for development
+config :nullzara, Nullzara.RateLimiter,
+  limits: %{
+    create: {100, :timer.minutes(10)},
+    verify: {100, :timer.minutes(10)}
+  }
+
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

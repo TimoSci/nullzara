@@ -4,35 +4,43 @@ defmodule Nullzara.RateLimiterTest do
   alias Nullzara.RateLimiter
 
   setup do
-    # RateLimiter is started by the application, clear state between tests
-    RateLimiter.clear("test_ip")
+    RateLimiter.clear(:verify, "test_ip")
+    RateLimiter.clear(:create, "test_ip")
+    RateLimiter.clear(:verify, "blocked_ip")
+    RateLimiter.clear(:verify, "other_ip")
     :ok
   end
 
-  describe "record_failure/1 and blocked?/1" do
-    test "is not blocked with fewer than 10 failures" do
-      for _ <- 1..9, do: RateLimiter.record_failure("test_ip")
-      refute RateLimiter.blocked?("test_ip")
+  describe "record/2 and blocked?/2" do
+    test "is not blocked below threshold" do
+      for _ <- 1..9, do: RateLimiter.record(:verify, "test_ip")
+      refute RateLimiter.blocked?(:verify, "test_ip")
     end
 
-    test "is blocked after 10 failures" do
-      for _ <- 1..10, do: RateLimiter.record_failure("test_ip")
-      assert RateLimiter.blocked?("test_ip")
+    test "is blocked after reaching threshold" do
+      for _ <- 1..10, do: RateLimiter.record(:verify, "test_ip")
+      assert RateLimiter.blocked?(:verify, "test_ip")
     end
 
     test "different IPs are tracked independently" do
-      for _ <- 1..10, do: RateLimiter.record_failure("blocked_ip")
-      refute RateLimiter.blocked?("other_ip")
+      for _ <- 1..10, do: RateLimiter.record(:verify, "blocked_ip")
+      refute RateLimiter.blocked?(:verify, "other_ip")
+    end
+
+    test "different buckets are tracked independently" do
+      for _ <- 1..10, do: RateLimiter.record(:verify, "test_ip")
+      assert RateLimiter.blocked?(:verify, "test_ip")
+      refute RateLimiter.blocked?(:create, "test_ip")
     end
   end
 
-  describe "clear/1" do
-    test "unblocks an IP" do
-      for _ <- 1..10, do: RateLimiter.record_failure("test_ip")
-      assert RateLimiter.blocked?("test_ip")
+  describe "clear/2" do
+    test "unblocks an IP for a specific bucket" do
+      for _ <- 1..10, do: RateLimiter.record(:verify, "test_ip")
+      assert RateLimiter.blocked?(:verify, "test_ip")
 
-      RateLimiter.clear("test_ip")
-      refute RateLimiter.blocked?("test_ip")
+      RateLimiter.clear(:verify, "test_ip")
+      refute RateLimiter.blocked?(:verify, "test_ip")
     end
   end
 end

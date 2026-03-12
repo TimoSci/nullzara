@@ -3,6 +3,7 @@ defmodule NullzaraWeb.PageController do
 
   alias Nullzara.Users
   alias Nullzara.Users.Mnemonic
+  alias Nullzara.RateLimiter
 
   def home(conn, _params) do
     render(conn, :home)
@@ -15,6 +16,9 @@ defmodule NullzaraWeb.PageController do
   end
 
   def create(conn, _params) do
+    ip = conn.remote_ip |> :inet.ntoa() |> to_string()
+    RateLimiter.record(:create, ip)
+
     case Users.create_user_with_token(%{name: "Anonymous"}) do
       {:ok, user} ->
         mnemonic = Mnemonic.encode(user.raw_token)
@@ -32,6 +36,9 @@ defmodule NullzaraWeb.PageController do
   end
 
   def create_magiclink(conn, _params) do
+    ip = conn.remote_ip |> :inet.ntoa() |> to_string()
+    RateLimiter.record(:create, ip)
+
     case Users.create_magiclink_user(%{name: "Anonymous"}) do
       {:ok, user} ->
         conn

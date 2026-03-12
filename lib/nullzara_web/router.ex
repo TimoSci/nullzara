@@ -15,8 +15,12 @@ defmodule NullzaraWeb.Router do
     plug NullzaraWeb.Plugs.RequireAuth
   end
 
-  pipeline :rate_limited do
-    plug NullzaraWeb.Plugs.RateLimit
+  pipeline :rate_limit_create do
+    plug NullzaraWeb.Plugs.RateLimit, bucket: :create
+  end
+
+  pipeline :rate_limit_verify do
+    plug NullzaraWeb.Plugs.RateLimit, bucket: :verify
   end
 
   pipeline :api do
@@ -33,10 +37,15 @@ defmodule NullzaraWeb.Router do
   end
 
   scope "/", NullzaraWeb do
-    pipe_through [:browser, :rate_limited]
+    pipe_through [:browser, :rate_limit_create]
 
     post "/", PageController, :create
     post "/magiclink", PageController, :create_magiclink
+  end
+
+  scope "/", NullzaraWeb do
+    pipe_through [:browser, :rate_limit_verify]
+
     get "/u/:token", TokenController, :verify
   end
 

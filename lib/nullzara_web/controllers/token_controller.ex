@@ -37,7 +37,7 @@ defmodule NullzaraWeb.TokenController do
 
       {:error, :not_found} ->
         ip = conn.remote_ip |> :inet.ntoa() |> to_string()
-        RateLimiter.record_failure(ip)
+        RateLimiter.record(:verify, ip)
 
         conn
         |> put_flash(:error, "Invalid access token.")

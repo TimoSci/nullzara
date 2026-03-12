@@ -11,6 +11,14 @@ config :nullzara,
   ecto_repos: [Nullzara.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+# Configure rate limiting
+config :nullzara, Nullzara.RateLimiter,
+  cleanup_interval_ms: :timer.minutes(1),
+  limits: %{
+    create: {5, :timer.minutes(10)},
+    verify: {10, :timer.minutes(10)}
+  }
+
 # Configure the endpoint
 config :nullzara, NullzaraWeb.Endpoint,
   url: [host: "localhost"],
