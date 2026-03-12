@@ -105,6 +105,10 @@ defmodule NullzaraWeb.Layouts do
       </div>
     </main>
 
+    <footer class="text-center text-sm opacity-50 py-8">
+      Powered by Nullzara {Application.spec(:nullzara, :vsn)} - the user authenticator that respects your privacy
+    </footer>
+
     <.flash_group flash={@flash} />
     """
   end
