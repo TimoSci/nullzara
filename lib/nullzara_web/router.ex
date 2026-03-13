@@ -36,6 +36,7 @@ defmodule NullzaraWeb.Router do
     live "/access/mnemonic", AccessLive
     live "/access/passkey", PasskeyLive
     get "/access/passkey/complete", PasskeyController, :complete
+    live "/access/wallet", WalletLive
   end
 
   scope "/", NullzaraWeb do
@@ -49,6 +50,7 @@ defmodule NullzaraWeb.Router do
     pipe_through [:browser, :rate_limit_verify]
 
     get "/u/:token", TokenController, :verify
+    get "/access/wallet/complete", WalletController, :complete
   end
 
   scope "/", NullzaraWeb do
