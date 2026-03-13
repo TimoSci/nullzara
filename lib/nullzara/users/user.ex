@@ -11,6 +11,7 @@ defmodule Nullzara.Users.User do
     field :raw_login_token, :string, virtual: true
 
     has_many :webauthn_credentials, Nullzara.Webauthn.Credential
+    has_one :wallet_credential, Nullzara.Wallet.Credential
 
     timestamps(type: :utc_datetime)
   end
