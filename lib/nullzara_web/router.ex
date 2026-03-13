@@ -68,6 +68,7 @@ defmodule NullzaraWeb.Router do
       live "/users", UserLive.Index, :index
       live "/users/new", UserLive.Form, :new
       live "/users/:uuid/edit", UserLive.Form, :edit
+      live "/user/:id/settings/wallet", WalletSettingsLive
     end
   end
 
