@@ -73,6 +73,23 @@ defmodule Nullzara.Wallet do
     Repo.delete(credential)
   end
 
+  @doc """
+  Derives a CSS linear-gradient string from a wallet address.
+  Extracts 3 colors from the address bytes to produce a unique visual identifier.
+  """
+  def address_gradient(address) do
+    bytes =
+      address
+      |> String.trim_leading("0x")
+      |> Base.decode16!(case: :mixed)
+
+    <<r1, g1, b1, r2, g2, b2, r3, g3, b3, _rest::binary>> = bytes
+    c1 = "rgb(#{r1},#{g1},#{b1})"
+    c2 = "rgb(#{r2},#{g2},#{b2})"
+    c3 = "rgb(#{r3},#{g3},#{b3})"
+    "linear-gradient(135deg, #{c1}, #{c2}, #{c3})"
+  end
+
   # --- Private: EIP-191 signature recovery ---
 
   defp recover_address(hex_signature, message) do

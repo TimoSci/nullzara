@@ -54,6 +54,10 @@ defmodule NullzaraWeb.Layouts do
             Ecto.assoc_loaded?(@current_user.wallet_credential) && @current_user.wallet_credential
           }>
             - Wallet:
+            <span
+              class="inline-block size-4 rounded-full align-middle"
+              style={"background: #{Nullzara.Wallet.address_gradient(@current_user.wallet_credential.address)}"}
+            />
             <span class="font-mono text-xs opacity-50">
               {@current_user.wallet_credential.address}
             </span>
@@ -69,6 +73,10 @@ defmodule NullzaraWeb.Layouts do
             Ecto.assoc_loaded?(@current_user.wallet_credential) && @current_user.wallet_credential
           }>
             - Wallet:
+            <span
+              class="inline-block size-4 rounded-full align-middle"
+              style={"background: #{Nullzara.Wallet.address_gradient(@current_user.wallet_credential.address)}"}
+            />
             <span class="font-mono text-xs opacity-50">
               {@current_user.wallet_credential.address}
             </span>
