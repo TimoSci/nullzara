@@ -51,6 +51,39 @@
   </.form>
 </div>
 
+<div class="rounded-box border border-base-300 bg-base-200/50 p-6 space-y-4">
+  <h2 class="text-lg font-semibold">Wallet</h2>
+  <div :if={@user.wallet_credential}>
+    <p class="text-sm text-base-content/70">
+      Connected wallet address:
+    </p>
+    <p class="font-mono text-sm bg-base-300/50 rounded-box p-3 select-all">
+      {@user.wallet_credential.address}
+    </p>
+    <.form
+      for={%{}}
+      action={~p"/user/#{@user}/settings/wallet"}
+      method="delete"
+      class="mt-4"
+    >
+      <.button
+        type="submit"
+        data-confirm="Disconnect this wallet? You can connect a different one later."
+      >
+        Disconnect Wallet
+      </.button>
+    </.form>
+  </div>
+  <div :if={!@user.wallet_credential}>
+    <p class="text-sm text-base-content/70">
+      No wallet connected. Connect an Ethereum wallet to sign in with it.
+    </p>
+    <.button navigate={~p"/user/#{@user}/settings/wallet"} class="mt-4">
+      <.icon name="hero-wallet-mini" /> Connect Wallet
+    </.button>
+  </div>
+</div>
+
 <div class="rounded-box border border-error/30 bg-error/5 p-6 space-y-4">
   <h2 class="text-lg font-semibold text-error">Delete Account</h2>
   <p class="text-sm text-base-content/70">

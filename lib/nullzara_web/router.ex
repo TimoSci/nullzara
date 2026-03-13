@@ -61,6 +61,7 @@ defmodule NullzaraWeb.Router do
     put "/user/:id/settings", SettingsController, :update
     post "/user/:id/settings/token", SettingsController, :regenerate_token
     delete "/user/:id/settings", SettingsController, :delete
+    delete "/user/:id/settings/wallet", SettingsController, :detach_wallet
 
     live_session :authenticated,
       on_mount: [{NullzaraWeb.Plugs.Auth, :require_authenticated_user}] do
