@@ -161,7 +161,10 @@ defmodule NullzaraWeb.WalletSettingsLive do
               {:noreply,
                socket
                |> assign(:loading, false)
-               |> assign(:error, "Could not connect wallet. It may already be linked to another account.")}
+               |> assign(
+                 :error,
+                 "Could not connect wallet. It may already be linked to another account."
+               )}
           end
 
         {:error, _reason} ->
