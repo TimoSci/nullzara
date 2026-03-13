@@ -15,6 +15,7 @@ defmodule NullzaraWeb.Plugs.Auth do
   def call(conn, _opts) do
     user_id = get_session(conn, :user_id)
     user = user_id && Users.get_user(user_id)
+    user = user && Nullzara.Repo.preload(user, :wallet_credential)
     user = maybe_attach_login_token(user, get_session(conn, :login_token))
     assign(conn, :current_user, user)
   end
@@ -54,6 +55,7 @@ defmodule NullzaraWeb.Plugs.Auth do
     assign_new(socket, :current_user, fn ->
       user_id = session["user_id"]
       user = user_id && Users.get_user(user_id)
+      user = user && Nullzara.Repo.preload(user, :wallet_credential)
       maybe_attach_login_token(user, session["login_token"])
     end)
   end

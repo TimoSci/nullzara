@@ -47,6 +47,14 @@ defmodule NullzaraWeb.Layouts do
           :if={@current_user && Nullzara.Users.User.is_magiclink?(@current_user)}
           class="text-sm opacity-70"
         >
+          <span
+            :if={
+              Ecto.assoc_loaded?(@current_user.wallet_credential) && @current_user.wallet_credential
+            }
+            class="font-mono opacity-50"
+          >
+            {@current_user.wallet_credential.address}
+          </span>
           Signed in via Magiclink as
           <span class="font-semibold">{Nullzara.Users.User.slug(@current_user)}</span>
           - Nickname: <span class="font-semibold">{@current_user.name}</span>
@@ -55,6 +63,14 @@ defmodule NullzaraWeb.Layouts do
           :if={@current_user && !Nullzara.Users.User.is_magiclink?(@current_user)}
           class="text-sm opacity-70"
         >
+          <span
+            :if={
+              Ecto.assoc_loaded?(@current_user.wallet_credential) && @current_user.wallet_credential
+            }
+            class="font-mono opacity-50"
+          >
+            {@current_user.wallet_credential.address}
+          </span>
           Signed in as <span class="font-semibold">{Nullzara.Users.User.slug(@current_user)}</span>
           - Nickname: <span class="font-semibold">{@current_user.name}</span>
         </span>
