@@ -1,0 +1,35 @@
+<Layouts.app flash={@flash} current_user={@user}>
+  <div class="space-y-8">
+    <div class="rounded-box border border-warning bg-warning/10 p-6">
+      <div class="flex items-center gap-2 mb-2">
+        <.icon name="hero-exclamation-triangle" class="size-5 text-warning" />
+        <h2 class="font-bold text-warning">Save Your Magic Link</h2>
+      </div>
+      <p class="text-sm mb-3">
+        This is your only way to access this account. Anyone with this link can log in &mdash; keep it safe.
+      </p>
+      <p class="font-mono text-sm bg-base-300/50 rounded-box p-3 select-all">
+        {NullzaraWeb.Endpoint.url()}/users/{Phoenix.Flash.get(@flash, :magiclink)}
+      </p>
+    </div>
+
+    <div class="rounded-box border border-accent bg-accent/10 p-6">
+      <div class="flex items-center gap-2 mb-2">
+        <.icon name="hero-light-bulb" class="size-5 text-accent" />
+        <h2 class="font-bold text-accent">Login Token</h2>
+      </div>
+      <p class="text-sm mb-3">
+        You can also use this token directly to log in.
+      </p>
+      <p class="font-mono text-sm bg-base-300/50 rounded-box p-3 select-all">
+        {Phoenix.Flash.get(@flash, :magiclink)}
+      </p>
+    </div>
+
+    <div class="flex justify-center">
+      <.button navigate={~p"/user/#{@user}/dashboard"} variant="primary">
+        <.icon name="hero-check-mini" /> Done!
+      </.button>
+    </div>
+  </div>
+</Layouts.app>

@@ -1,9 +1,9 @@
-defmodule Userphoenix.MixProject do
+defmodule Nullzara.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :userphoenix,
+      app: :nullzara,
       version: "0.1.0",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -20,7 +20,7 @@ defmodule Userphoenix.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     [
-      mod: {Userphoenix.Application, []},
+      mod: {Nullzara.Application, []},
       extra_applications: [:logger, :runtime_tools]
     ]
   end
@@ -65,7 +65,11 @@ defmodule Userphoenix.MixProject do
       {:gettext, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:unique_names_generator, "~> 0.2.0"},
+      {:wax_, "~> 0.7"},
+      {:ex_secp256k1, "~> 0.7"},
+      {:ex_keccak, "~> 0.7"}
     ]
   end
 
@@ -82,10 +86,10 @@ defmodule Userphoenix.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["compile", "tailwind userphoenix", "esbuild userphoenix"],
+      "assets.build": ["compile", "tailwind nullzara", "esbuild nullzara"],
       "assets.deploy": [
-        "tailwind userphoenix --minify",
-        "esbuild userphoenix --minify",
+        "tailwind nullzara --minify",
+        "esbuild nullzara --minify",
         "phx.digest"
       ],
       precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
