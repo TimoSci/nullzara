@@ -70,6 +70,14 @@ defmodule NullzaraWeb.WalletSettingsLive do
               }
             });
 
+            if (window.ethereum) {
+              window.ethereum.on("accountsChanged", (accounts) => {
+                if (accounts.length > 0) {
+                  this.pushEvent("wallet_connected", { address: accounts[0] });
+                }
+              });
+            }
+
             this.handleEvent("sign_message", async (data) => {
               try {
                 const signature = await window.ethereum.request({
