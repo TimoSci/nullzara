@@ -67,7 +67,9 @@ defmodule Nullzara.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:unique_names_generator, "~> 0.2.0"},
-      {:wax_, "~> 0.7"}
+      {:wax_, "~> 0.7"},
+      {:ex_secp256k1, "~> 0.7"},
+      {:ex_keccak, "~> 0.7"}
     ]
   end
 
