@@ -9,7 +9,7 @@
         This is your only way to access this account. Anyone with this link can log in &mdash; keep it safe.
       </p>
       <p class="font-mono text-sm bg-base-300/50 rounded-box p-3 select-all">
-        {NullzaraWeb.Endpoint.url()}/users/{Phoenix.Flash.get(@flash, :magiclink)}
+        {NullzaraWeb.Endpoint.url()}/u/{Phoenix.Flash.get(@flash, :magiclink)}
       </p>
     </div>
 
