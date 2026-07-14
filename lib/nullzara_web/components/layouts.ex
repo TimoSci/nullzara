@@ -40,7 +40,10 @@ defmodule NullzaraWeb.Layouts do
     <header class="navbar px-4 sm:px-6 lg:px-8">
       <div class="flex-1 flex items-center gap-4">
         <a href="/" class="text-lg font-bold">Nullzara</a>
-        <span :if={Phoenix.Flash.get(@flash, :mnemonic)} class="text-base font-bold text-primary">
+        <span
+          :if={Phoenix.Flash.get(@flash, :account_created)}
+          class="text-base font-bold text-primary"
+        >
           Account Created!
         </span>
         <span

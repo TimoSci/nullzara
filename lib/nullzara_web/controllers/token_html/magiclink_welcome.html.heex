@@ -9,7 +9,7 @@
         This is your only way to access this account. Anyone with this link can log in &mdash; keep it safe.
       </p>
       <p class="font-mono text-sm bg-base-300/50 rounded-box p-3 select-all">
-        {NullzaraWeb.Endpoint.url()}/users/{Phoenix.Flash.get(@flash, :magiclink)}
+        {NullzaraWeb.Endpoint.url()}/users/{@token}
       </p>
     </div>
 
@@ -22,12 +22,12 @@
         You can also use this token directly to log in.
       </p>
       <p class="font-mono text-sm bg-base-300/50 rounded-box p-3 select-all">
-        {Phoenix.Flash.get(@flash, :magiclink)}
+        {@token}
       </p>
     </div>
 
     <div class="flex justify-center">
-      <.button navigate={~p"/user/#{@user}/dashboard"} variant="primary">
+      <.button href={~p"/user/#{@user}/welcome/done"} method="post" variant="primary">
         <.icon name="hero-check-mini" /> Done!
       </.button>
     </div>

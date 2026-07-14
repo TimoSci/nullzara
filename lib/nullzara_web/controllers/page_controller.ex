@@ -2,7 +2,6 @@ defmodule NullzaraWeb.PageController do
   use NullzaraWeb, :controller
 
   alias Nullzara.Users
-  alias Nullzara.Users.Mnemonic
   alias Nullzara.RateLimiter
 
   def home(conn, _params) do
@@ -21,11 +20,10 @@ defmodule NullzaraWeb.PageController do
 
     case Users.create_user_with_token(%{name: "Anonymous"}) do
       {:ok, user} ->
-        mnemonic = Mnemonic.encode(user.raw_token)
-
         conn
-        |> put_flash(:mnemonic, mnemonic)
-        |> put_flash(:login_token, user.raw_login_token)
+        |> put_session(:show_welcome, "mnemonic")
+        |> put_session(:login_token, user.raw_login_token)
+        |> put_flash(:account_created, true)
         |> redirect(to: ~p"/u/#{user.raw_token}")
 
       {:error, _changeset} ->
@@ -42,7 +40,8 @@ defmodule NullzaraWeb.PageController do
     case Users.create_magiclink_user(%{name: "Anonymous"}) do
       {:ok, user} ->
         conn
-        |> put_flash(:magiclink, user.raw_login_token)
+        |> put_session(:show_welcome, "magiclink")
+        |> put_flash(:account_created, true)
         |> redirect(to: ~p"/u/#{user.raw_login_token}")
 
       {:error, _changeset} ->

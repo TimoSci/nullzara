@@ -2,6 +2,7 @@ defmodule NullzaraWeb.TokenController do
   use NullzaraWeb, :controller
 
   alias Nullzara.Users
+  alias Nullzara.Users.Mnemonic
   alias Nullzara.RateLimiter
 
   def verify(conn, %{"token" => raw_token}) do
@@ -24,11 +25,17 @@ defmodule NullzaraWeb.TokenController do
               {conn, user}
           end
 
-        cond do
-          Phoenix.Flash.get(conn.assigns.flash, :mnemonic) ->
-            render(conn, :welcome, user: user, token: raw_token)
+        show_welcome = get_session(conn, :show_welcome)
 
-          Phoenix.Flash.get(conn.assigns.flash, :magiclink) ->
+        cond do
+          show_welcome == "mnemonic" and match_type == :mnemonic ->
+            render(conn, :welcome,
+              user: user,
+              mnemonic: Mnemonic.encode(raw_token),
+              login_token: get_session(conn, :login_token)
+            )
+
+          show_welcome == "magiclink" and Users.User.is_magiclink?(user) ->
             render(conn, :magiclink_welcome, user: user, token: raw_token)
 
           true ->
@@ -43,5 +50,20 @@ defmodule NullzaraWeb.TokenController do
         |> put_flash(:error, "Invalid access token.")
         |> redirect(to: ~p"/access/token")
     end
+  end
+
+  def acknowledge(conn, _params) do
+    user = conn.assigns.current_user
+
+    conn = delete_session(conn, :show_welcome)
+
+    # Magiclink users need the raw login token in session for URL generation;
+    # for mnemonic users it was only kept for the welcome page.
+    conn =
+      if Users.User.is_magiclink?(user),
+        do: conn,
+        else: delete_session(conn, :login_token)
+
+    redirect(conn, to: ~p"/user/#{user}/dashboard")
   end
 end

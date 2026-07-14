@@ -57,6 +57,7 @@ defmodule NullzaraWeb.Router do
     pipe_through [:browser, :require_auth]
 
     get "/user/:id/dashboard", DashboardController, :show
+    post "/user/:id/welcome/done", TokenController, :acknowledge
     get "/user/:id/settings", SettingsController, :show
     put "/user/:id/settings", SettingsController, :update
     post "/user/:id/settings/token", SettingsController, :regenerate_token
