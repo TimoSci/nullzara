@@ -37,8 +37,8 @@ defmodule NullzaraWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1 flex items-center gap-4">
+    <header class="navbar flex-wrap gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
+      <div class="flex-1 min-w-0 flex flex-wrap items-center gap-x-4 gap-y-1">
         <a href="/" class="text-lg font-bold">Nullzara</a>
         <span
           :if={Phoenix.Flash.get(@flash, :account_created)}
@@ -48,7 +48,7 @@ defmodule NullzaraWeb.Layouts do
         </span>
         <span
           :if={@current_user && Nullzara.Users.User.is_magiclink?(@current_user)}
-          class="text-sm opacity-70"
+          class="min-w-0 text-sm opacity-70 [overflow-wrap:anywhere]"
         >
           Signed in via Magiclink as
           <span class="font-semibold">{Nullzara.Users.User.slug(@current_user)}</span>
@@ -61,14 +61,14 @@ defmodule NullzaraWeb.Layouts do
               class="inline-block size-4 rounded-full align-middle"
               style={"background: #{Nullzara.Wallet.address_gradient(@current_user.wallet_credential.address)}"}
             />
-            <span class="font-mono text-xs opacity-50">
+            <span class="font-mono text-xs opacity-50 break-all">
               {@current_user.wallet_credential.address}
             </span>
           </span>
         </span>
         <span
           :if={@current_user && !Nullzara.Users.User.is_magiclink?(@current_user)}
-          class="text-sm opacity-70"
+          class="min-w-0 text-sm opacity-70 [overflow-wrap:anywhere]"
         >
           Signed in as <span class="font-semibold">{Nullzara.Users.User.slug(@current_user)}</span>
           - Nickname: <span class="font-semibold">{@current_user.name}</span>
@@ -80,14 +80,14 @@ defmodule NullzaraWeb.Layouts do
               class="inline-block size-4 rounded-full align-middle"
               style={"background: #{Nullzara.Wallet.address_gradient(@current_user.wallet_credential.address)}"}
             />
-            <span class="font-mono text-xs opacity-50">
+            <span class="font-mono text-xs opacity-50 break-all">
               {@current_user.wallet_credential.address}
             </span>
           </span>
         </span>
       </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
+      <div class="flex-none max-w-full">
+        <ul class="flex flex-wrap items-center justify-end gap-2">
           <li>
             <.theme_toggle />
           </li>
