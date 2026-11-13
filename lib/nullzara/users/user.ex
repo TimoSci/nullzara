@@ -16,20 +16,24 @@ defmodule Nullzara.Users.User do
     timestamps(type: :utc_datetime)
   end
 
-  def slug(%__MODULE__{mnemonic_hash: hash}) when is_binary(hash) do
-    UniqueNamesGenerator.generate([:adjectives, :animals, :names],
-      seed: hash,
-      separator: "-"
-    )
-  end
+  def slug(%__MODULE__{mnemonic_hash: hash}) when is_binary(hash), do: generate_slug(hash)
 
   # Magic-link accounts have no mnemonic. Seed from the UUID, which never
   # changes, so regenerating the login token keeps the same slug.
-  def slug(%__MODULE__{mnemonic_hash: nil, uuid: uuid}) when is_binary(uuid) do
+  def slug(%__MODULE__{mnemonic_hash: nil, uuid: uuid}) when is_binary(uuid),
+    do: generate_slug(uuid)
+
+  # UniqueNamesGenerator raises for roughly 1 in 1000 seeds. Those accounts
+  # would crash every page that shows the slug, so fall back to the same
+  # seed with a suffix, which is just as stable.
+  defp generate_slug(seed, attempt \\ 0) do
     UniqueNamesGenerator.generate([:adjectives, :animals, :names],
-      seed: uuid,
+      seed: if(attempt == 0, do: seed, else: "#{seed}:#{attempt}"),
       separator: "-"
     )
+  rescue
+    error in [ArgumentError, MatchError] ->
+      if attempt < 10, do: generate_slug(seed, attempt + 1), else: reraise(error, __STACKTRACE__)
   end
 
   def is_magiclink?(%__MODULE__{mnemonic_hash: nil}), do: true

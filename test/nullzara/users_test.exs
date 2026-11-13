@@ -46,6 +46,20 @@ defmodule Nullzara.UsersTest do
       assert User.slug(updated) == User.slug(user)
     end
 
+    # The name generator raises for roughly 1 in 1000 seeds; this is one.
+    @crashing_seed "5109faf2-3419-4e5c-b54a-98b475bc86d9"
+
+    test "slug/1 still returns a stable name for a seed the generator cannot handle" do
+      magiclink = %User{mnemonic_hash: nil, uuid: @crashing_seed}
+      mnemonic = %User{mnemonic_hash: @crashing_seed}
+
+      for user <- [magiclink, mnemonic] do
+        slug = User.slug(user)
+        assert slug =~ ~r/\A[^-]+-[^-]+-[^-]+\z/
+        assert User.slug(user) == slug
+      end
+    end
+
     test "different magic-link users get different slugs" do
       {:ok, one} = Users.create_magiclink_user(%{name: "m"})
       {:ok, two} = Users.create_magiclink_user(%{name: "m"})
