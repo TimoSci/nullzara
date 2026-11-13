@@ -33,5 +33,27 @@ defmodule NullzaraWeb.WalletSettingsLiveTest do
       assert render_hook(view, "wallet_error", %{"message" => "No wallet detected"}) =~
                "No wallet detected"
     end
+
+    test "a malformed signature shows an error and keeps the page alive", %{
+      conn: conn,
+      user: user
+    } do
+      {:ok, view, _html} = live(conn, ~p"/user/#{user}/settings/wallet")
+
+      render_hook(view, "wallet_connected", %{
+        "address" => "0x0000000000000000000000000000000000000000"
+      })
+
+      for signature <- ["0xzz", "0x1234", nil] do
+        assert render_hook(view, "message_signed", %{"signature" => signature}) =~
+                 "Signature verification failed"
+
+        render_hook(view, "wallet_connected", %{
+          "address" => "0x0000000000000000000000000000000000000000"
+        })
+      end
+
+      assert Process.alive?(view.pid)
+    end
   end
 end

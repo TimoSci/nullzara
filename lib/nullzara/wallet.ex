@@ -92,30 +92,25 @@ defmodule Nullzara.Wallet do
 
   # --- Private: EIP-191 signature recovery ---
 
-  defp recover_address(hex_signature, message) do
-    # Strip 0x prefix and decode
-    raw_sig = hex_signature |> String.trim_leading("0x") |> Base.decode16!(case: :mixed)
-
-    # Split into r (32), s (32), v (1)
-    <<r::binary-size(32), s::binary-size(32), v>> = raw_sig
-
-    # Normalize v: Ethereum uses 27/28, ex_secp256k1 expects 0/1
-    recovery_id = if v >= 27, do: v - 27, else: v
-
-    # EIP-191 prefixed hash
-    prefixed = "\x19Ethereum Signed Message:\n#{byte_size(message)}" <> message
-    hash = ExKeccak.hash_256(prefixed)
-
-    # Recover public key
-    case ExSecp256k1.recover(hash, r, s, recovery_id) do
-      {:ok, public_key} ->
-        # public_key is 65 bytes: 0x04 prefix + 64 bytes of key data
-        <<4, key_data::binary-size(64)>> = public_key
-        <<_::binary-size(12), address_bytes::binary-size(20)>> = ExKeccak.hash_256(key_data)
-        {:ok, "0x" <> Base.encode16(address_bytes, case: :lower)}
-
-      {:error, reason} ->
-        {:error, reason}
+  defp recover_address(hex_signature, message) when is_binary(hex_signature) do
+    # The signature comes straight from the browser, so it may be anything.
+    # It must be 65 bytes of hex: r (32), s (32), v (1).
+    with {:ok, <<r::binary-size(32), s::binary-size(32), v>>} <-
+           hex_signature |> String.trim_leading("0x") |> Base.decode16(case: :mixed),
+         # Ethereum uses 27/28 for v, ex_secp256k1 expects 0/1
+         recovery_id = if(v >= 27, do: v - 27, else: v),
+         true <- recovery_id in [0, 1],
+         # EIP-191 prefixed hash
+         hash =
+           ExKeccak.hash_256("\x19Ethereum Signed Message:\n#{byte_size(message)}" <> message),
+         # public_key is 65 bytes: 0x04 prefix + 64 bytes of key data
+         {:ok, <<4, key_data::binary-size(64)>>} <- ExSecp256k1.recover(hash, r, s, recovery_id) do
+      <<_::binary-size(12), address_bytes::binary-size(20)>> = ExKeccak.hash_256(key_data)
+      {:ok, "0x" <> Base.encode16(address_bytes, case: :lower)}
+    else
+      _ -> {:error, :invalid_signature}
     end
   end
+
+  defp recover_address(_signature, _message), do: {:error, :invalid_signature}
 end

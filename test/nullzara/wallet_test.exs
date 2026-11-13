@@ -77,6 +77,42 @@ defmodule Nullzara.WalletTest do
     end
   end
 
+  describe "verify_signature/3 with a malformed signature" do
+    @address "0x0000000000000000000000000000000000000000"
+
+    for {label, sig} <- [
+          {"not hex", "0xzz"},
+          {"too short", "0x" <> String.duplicate("ab", 64)},
+          {"too long", "0x" <> String.duplicate("ab", 66)},
+          {"empty", ""},
+          {"not a string", nil}
+        ] do
+      test "returns an error when the signature is #{label}" do
+        assert {:error, :invalid_signature} =
+                 Wallet.verify_signature(unquote(sig), "msg", @address)
+      end
+    end
+
+    test "returns an error, not a crash, for 65 bytes that are not a signature" do
+      assert {:error, _} =
+               Wallet.verify_signature("0x" <> String.duplicate("ff", 65), "msg", @address)
+    end
+
+    test "accepts a valid signature without the 0x prefix" do
+      private_key = :crypto.strong_rand_bytes(32)
+      {:ok, <<4, key_data::binary-size(64)>>} = ExSecp256k1.create_public_key(private_key)
+      <<_::binary-size(12), address_bytes::binary-size(20)>> = ExKeccak.hash_256(key_data)
+      address = "0x" <> Base.encode16(address_bytes, case: :lower)
+
+      message = Wallet.build_sign_message(Wallet.generate_nonce())
+      prefixed = "\x19Ethereum Signed Message:\n#{byte_size(message)}" <> message
+      {:ok, {r, s, v}} = ExSecp256k1.sign(ExKeccak.hash_256(prefixed), private_key)
+      bare = Base.encode16(r <> s <> <<v + 27>>, case: :lower)
+
+      assert {:ok, ^address} = Wallet.verify_signature(bare, message, address)
+    end
+  end
+
   describe "store_credential/1" do
     test "creates a user and wallet credential" do
       address = "0x" <> Base.encode16(:crypto.strong_rand_bytes(20), case: :lower)
