@@ -37,7 +37,8 @@ defmodule NullzaraWeb.AccessTokenLiveTest do
         |> form("#token-form", access: %{token: raw_token})
         |> render_submit()
 
-      assert {:error, {:live_redirect, %{to: "/u/" <> _token}}} = result
+      assert {:error, {:redirect, %{to: to}}} = result
+      assert to == "/u/" <> raw_token
     end
 
     test "shows error for invalid token format", %{conn: conn} do

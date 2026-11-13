@@ -5,7 +5,7 @@ defmodule NullzaraWeb.TokenController do
   alias Nullzara.Users.Mnemonic
   alias Nullzara.RateLimiter
 
-  def verify(conn, %{"token" => raw_token}) do
+  def verify(conn, %{"token" => raw_token} = params) do
     # Tokens are lower-case hex; accept them typed or pasted in capitals.
     raw_token = String.downcase(raw_token)
 
@@ -49,9 +49,17 @@ defmodule NullzaraWeb.TokenController do
         ip = conn.remote_ip |> :inet.ntoa() |> to_string()
         RateLimiter.record(:verify, ip)
 
-        conn
-        |> put_flash(:error, "Invalid access token.")
-        |> redirect(to: ~p"/access/token")
+        # The recovery phrase form sends `via=mnemonic`, so a wrong phrase
+        # returns to that form rather than the token form.
+        if params["via"] == "mnemonic" do
+          conn
+          |> put_flash(:error, "No account matches that recovery phrase.")
+          |> redirect(to: ~p"/access/mnemonic")
+        else
+          conn
+          |> put_flash(:error, "Invalid access token.")
+          |> redirect(to: ~p"/access/token")
+        end
     end
   end
 

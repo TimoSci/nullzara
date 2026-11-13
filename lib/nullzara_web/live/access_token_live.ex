@@ -43,7 +43,8 @@ defmodule NullzaraWeb.AccessTokenLive do
     token = String.trim(token)
 
     if String.match?(token, ~r/\A[0-9a-fA-F]{32}\z/) do
-      {:noreply, push_navigate(socket, to: ~p"/u/#{token}")}
+      # /u/:token is a controller route, so this is a full page redirect.
+      {:noreply, redirect(socket, to: ~p"/u/#{token}")}
     else
       {:noreply,
        put_flash(socket, :error, "Invalid token format. Please enter a 32-character hex token.")}

@@ -34,5 +34,27 @@ defmodule NullzaraWeb.PasskeyLiveTest do
       assert render_hook(view, "webauthn_error", %{"message" => "User cancelled"}) =~
                "User cancelled"
     end
+
+    test "a failed registration shows a plain message, not internal details", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/access/passkey")
+      view |> element("#passkey-register-btn") |> render_click()
+
+      client_data =
+        Base.url_encode64(
+          ~s|{"type":"webauthn.get","challenge":"AAAA","origin":"http://localhost:4000"}|,
+          padding: false
+        )
+
+      html =
+        render_hook(view, "registration_response", %{
+          "attestation_object" => "AAAA",
+          "client_data_json" => client_data,
+          "raw_id" => "AAAA"
+        })
+
+      assert html =~ "Passkey registration failed. Please try again."
+      refute html =~ "Wax"
+      refute html =~ "%{"
+    end
   end
 end

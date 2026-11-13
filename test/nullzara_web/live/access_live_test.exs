@@ -36,7 +36,8 @@ defmodule NullzaraWeb.AccessLiveTest do
         |> form("#access-form", access: %{phrase: mnemonic})
         |> render_submit()
 
-      assert {:error, {:live_redirect, %{to: "/u/" <> _token}}} = result
+      assert {:error, {:redirect, %{to: to}}} = result
+      assert to == "/u/#{raw_token}?via=mnemonic"
     end
 
     test "accepts a capitalised phrase with extra whitespace", %{conn: conn} do
@@ -76,6 +77,18 @@ defmodule NullzaraWeb.AccessLiveTest do
 
       html = render(live_view)
       assert html =~ "not recognized"
+    end
+
+    test "typing again clears a previous error", %{conn: conn} do
+      {:ok, live_view, _html} = live(conn, ~p"/access/mnemonic")
+
+      assert live_view
+             |> form("#access-form", access: %{phrase: "one two three"})
+             |> render_submit() =~ "Please enter exactly 12 words."
+
+      refute live_view
+             |> form("#access-form", access: %{phrase: "one two three four"})
+             |> render_change() =~ "Please enter exactly 12 words."
     end
 
     test "has link to token login page", %{conn: conn} do

@@ -48,7 +48,11 @@ defmodule NullzaraWeb.AccessLive do
   def handle_event("validate", %{"access" => %{"phrase" => phrase}}, socket) do
     word_count = phrase |> String.split() |> length()
     form = to_form(%{"phrase" => phrase}, as: :access)
-    {:noreply, assign(socket, form: form, word_count: word_count)}
+
+    {:noreply,
+     socket
+     |> clear_flash(:error)
+     |> assign(form: form, word_count: word_count)}
   end
 
   def handle_event("access", %{"access" => %{"phrase" => phrase}}, socket) do
@@ -56,7 +60,9 @@ defmodule NullzaraWeb.AccessLive do
 
     case Mnemonic.decode_words(words) do
       {:ok, token} ->
-        {:noreply, push_navigate(socket, to: ~p"/u/#{token}")}
+        # /u/:token is a controller route, so this is a full page redirect.
+        # `via` sends a failed attempt back here instead of the token page.
+        {:noreply, redirect(socket, to: ~p"/u/#{token}?via=mnemonic")}
 
       {:error, :invalid_length} ->
         {:noreply, put_flash(socket, :error, "Please enter exactly 12 words.")}

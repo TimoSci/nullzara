@@ -188,6 +188,29 @@ defmodule NullzaraWeb.TokenControllerTest do
   end
 
   describe "GET /u/:token with invalid token" do
+    test "an unknown recovery phrase goes back to the phrase page", %{conn: conn} do
+      conn = get(conn, ~p"/u/00000000000000000000000000000000?via=mnemonic")
+      assert redirected_to(conn) == ~p"/access/mnemonic"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "No account matches that recovery phrase."
+    end
+
+    test "a failed recovery phrase still counts against the rate limit", %{conn: conn} do
+      ip = conn.remote_ip |> :inet.ntoa() |> to_string()
+      Nullzara.RateLimiter.clear(:verify, ip)
+      on_exit(fn -> Nullzara.RateLimiter.clear(:verify, ip) end)
+      {limit, _window} = Application.get_env(:nullzara, Nullzara.RateLimiter)[:limits][:verify]
+
+      for _ <- 1..limit do
+        get(build_conn(), ~p"/u/00000000000000000000000000000000?via=mnemonic")
+      end
+
+      conn = get(build_conn(), ~p"/u/00000000000000000000000000000000?via=mnemonic")
+      assert redirected_to(conn) == ~p"/"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Too many attempts"
+    end
+
     test "redirects to /access/token with invalid token", %{conn: conn} do
       conn = get(conn, ~p"/u/invalidtoken1234567890abcdef00")
       assert redirected_to(conn) == ~p"/access/token"

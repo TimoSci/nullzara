@@ -1,6 +1,8 @@
 defmodule NullzaraWeb.PasskeyLive do
   use NullzaraWeb, :live_view
 
+  require Logger
+
   alias Nullzara.Webauthn
 
   @impl true
@@ -190,10 +192,12 @@ defmodule NullzaraWeb.PasskeyLive do
         end
 
       {:error, reason} ->
+        Logger.warning("Passkey registration failed: #{inspect(reason)}")
+
         {:noreply,
          socket
          |> assign(:loading, false)
-         |> assign(:error, "Registration failed: #{inspect(reason)}")}
+         |> assign(:error, "Passkey registration failed. Please try again.")}
     end
   end
 
@@ -243,10 +247,12 @@ defmodule NullzaraWeb.PasskeyLive do
          |> assign(:error, "No passkey found. Create an account first.")}
 
       {:error, reason} ->
+        Logger.warning("Passkey sign-in failed: #{inspect(reason)}")
+
         {:noreply,
          socket
          |> assign(:loading, false)
-         |> assign(:error, "Authentication failed: #{inspect(reason)}")}
+         |> assign(:error, "Passkey sign-in failed. Please try again.")}
     end
   end
 
