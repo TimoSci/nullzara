@@ -61,6 +61,17 @@ defmodule NullzaraWeb.SettingsControllerTest do
     end
   end
 
+  describe "PUT /user/:id/settings with a too-long nickname" do
+    test "re-renders the form with an error", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> log_in_user(user)
+        |> put(~p"/user/#{user}/settings", %{"user" => %{"name" => String.duplicate("a", 300)}})
+
+      assert html_response(conn, 200) =~ "should be at most 50 character(s)"
+    end
+  end
+
   describe "POST /user/:id/settings/token" do
     test "regenerates login token and shows new token", %{conn: conn, user: user} do
       conn =

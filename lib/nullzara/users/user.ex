@@ -38,6 +38,7 @@ defmodule Nullzara.Users.User do
     user
     |> cast(attrs, [:name])
     |> validate_required([:name])
+    |> validate_length(:name, max: 50)
   end
 
   @doc false

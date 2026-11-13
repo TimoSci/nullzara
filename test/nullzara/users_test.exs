@@ -27,6 +27,18 @@ defmodule Nullzara.UsersTest do
       assert user.name == "some name"
     end
 
+    test "update_user/2 rejects a name longer than 50 characters" do
+      user = user_fixture()
+      assert {:error, changeset} = Users.update_user(user, %{name: String.duplicate("a", 51)})
+      assert "should be at most 50 character(s)" in errors_on(changeset).name
+    end
+
+    test "update_user/2 accepts 50 characters, including multi-byte ones" do
+      user = user_fixture()
+      assert {:ok, _} = Users.update_user(user, %{name: String.duplicate("a", 50)})
+      assert {:ok, _} = Users.update_user(user, %{name: String.duplicate("🙂", 50)})
+    end
+
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Users.create_user(@invalid_attrs)
     end
