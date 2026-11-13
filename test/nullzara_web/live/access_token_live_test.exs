@@ -12,6 +12,21 @@ defmodule NullzaraWeb.AccessTokenLiveTest do
       assert html =~ "Access Token"
     end
 
+    test "shows the signed-in navbar to a signed-in user", %{conn: conn} do
+      {user, _mnemonic_token, _login_token} = user_fixture_with_token()
+      {:ok, view, _html} = conn |> log_in_user(user) |> live(~p"/access/token")
+
+      assert has_element?(view, ~s|header form[action="/logout"]|)
+      refute has_element?(view, ~s|header a[href="/access/passkey"]|)
+    end
+
+    test "shows the logged-out navbar to a visitor", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/access/token")
+
+      refute has_element?(view, ~s|header form[action="/logout"]|)
+      assert has_element?(view, ~s|header a[href="/access/passkey"]|)
+    end
+
     test "redirects to /u/:token on valid hex token", %{conn: conn} do
       {_user, _raw_mnemonic_token, raw_token} = user_fixture_with_token()
 

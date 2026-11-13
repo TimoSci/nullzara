@@ -8,7 +8,7 @@ defmodule NullzaraWeb.WalletLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_user={@current_user}>
       <div class="space-y-8">
         <.header>
           Wallet Login

@@ -4,7 +4,7 @@ defmodule NullzaraWeb.AccessTokenLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_user={@current_user}>
       <.header>
         Access Your Account
         <:subtitle>Enter your access token to log in.</:subtitle>

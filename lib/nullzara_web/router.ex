@@ -32,11 +32,17 @@ defmodule NullzaraWeb.Router do
 
     get "/", PageController, :home
     delete "/logout", PageController, :logout
-    live "/access/token", AccessTokenLive
-    live "/access/mnemonic", AccessLive
-    live "/access/passkey", PasskeyLive
     get "/access/passkey/complete", PasskeyController, :complete
-    live "/access/wallet", WalletLive
+
+    # Login pages are open to everyone; the current user is only loaded
+    # so the navbar can show who is signed in.
+    live_session :public,
+      on_mount: [{NullzaraWeb.Plugs.Auth, :mount_current_user}] do
+      live "/access/token", AccessTokenLive
+      live "/access/mnemonic", AccessLive
+      live "/access/passkey", PasskeyLive
+      live "/access/wallet", WalletLive
+    end
   end
 
   scope "/", NullzaraWeb do

@@ -31,6 +31,16 @@ defmodule NullzaraWeb.UserLiveTest do
       assert html =~ user.name
     end
 
+    test "shows the signed-in navbar on the list, form and record pages",
+         %{conn: conn, user: user} do
+      for path <- [~p"/users", ~p"/users/new", ~p"/users/#{user}/edit", ~p"/users/#{user}"] do
+        {:ok, view, _html} = live(conn, path)
+
+        assert has_element?(view, ~s|header form[action="/logout"]|), path
+        refute has_element?(view, ~s|header a[href="/access/passkey"]|), path
+      end
+    end
+
     test "saves new user", %{conn: conn} do
       {:ok, index_live, _html} = live(conn, ~p"/users")
 
