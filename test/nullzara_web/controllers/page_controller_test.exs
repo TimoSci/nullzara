@@ -16,6 +16,15 @@ defmodule NullzaraWeb.PageControllerTest do
     end
   end
 
+  test "GET / shows the signed-in navbar to a signed-in user", %{conn: conn} do
+    {user, _mnemonic_token, _login_token} = Nullzara.UsersFixtures.user_fixture_with_token()
+    html = conn |> log_in_user(user) |> get(~p"/") |> html_response(200)
+
+    assert html =~ ~s|action="/logout"|
+    assert html =~ ~s|href="/user/#{user.uuid}/settings"|
+    refute html =~ "Create Anonymous Account"
+  end
+
   test "POST / creates an anonymous user and redirects to /u/:token", %{conn: conn} do
     conn = post(conn, ~p"/")
     assert "/u/" <> _token = redirected_to(conn)
