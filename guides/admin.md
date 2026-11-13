@@ -127,7 +127,7 @@ Deleting an account is permanent, and an admin can delete any account, including
 | Admin | Allowed | Allowed |
 | Signed in, not an admin | Sent to own dashboard with an error | Sent to own dashboard with an error |
 | Not signed in | Sent to `/access/token` | Sent to `/access/token` |
-| Holder of a magic-link token | Same as above | Allowed for their own record at `/users/<token>` |
+| Holder of a magic-link token | Same as above | `/users/<token>` redirects to `/u/<token>`, which signs them in |
 
 ## Troubleshooting
 

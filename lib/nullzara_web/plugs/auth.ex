@@ -63,9 +63,9 @@ defmodule NullzaraWeb.Plugs.Auth do
     end
   end
 
-  # The user record page. Admins may open any record. It is also the
-  # magic link target, so the holder of a magiclink login token may open
-  # the record that token belongs to.
+  # The user record page, for admins only. Magic links used to point here
+  # (/users/<token>), so a magiclink login token is sent on to the login
+  # link instead, which signs its holder in.
   def on_mount(:require_admin_or_magiclink, params, session, socket) do
     socket = mount_current_user(socket, session)
     user = socket.assigns.current_user
@@ -74,8 +74,8 @@ defmodule NullzaraWeb.Plugs.Auth do
       Users.admin?(user) ->
         {:cont, socket}
 
-      magiclink_user = magiclink_user_for(params["id"]) ->
-        {:cont, Phoenix.Component.assign(socket, :current_user, user || magiclink_user)}
+      magiclink_token?(params["id"]) ->
+        {:halt, Phoenix.LiveView.redirect(socket, to: "/u/#{params["id"]}")}
 
       user ->
         {:halt, deny(socket, user)}
@@ -85,16 +85,11 @@ defmodule NullzaraWeb.Plugs.Auth do
     end
   end
 
-  defp magiclink_user_for(token) when is_binary(token) do
-    with {:ok, user} <- Users.get_user_by_login_token(token),
-         true <- User.is_magiclink?(user) do
-      %{user | raw_login_token: token}
-    else
-      _ -> nil
-    end
+  defp magiclink_token?(token) when is_binary(token) do
+    match?({:ok, %User{mnemonic_hash: nil}}, Users.get_user_by_login_token(token))
   end
 
-  defp magiclink_user_for(_), do: nil
+  defp magiclink_token?(_), do: false
 
   defp deny(socket, user) do
     socket

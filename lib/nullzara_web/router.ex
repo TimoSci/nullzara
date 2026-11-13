@@ -81,7 +81,7 @@ defmodule NullzaraWeb.Router do
   scope "/", NullzaraWeb do
     pipe_through :browser
 
-    # Admins, or the holder of a magiclink token for that record.
+    # Admins only. An old magic link (/users/<token>) is redirected to /u/<token>.
     live_session :users_show,
       on_mount: [{NullzaraWeb.Plugs.Auth, :require_admin_or_magiclink}] do
       live "/users/:id", UserLive.Show, :show

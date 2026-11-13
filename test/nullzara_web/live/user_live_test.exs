@@ -181,13 +181,37 @@ defmodule NullzaraWeb.UserLiveTest do
   end
 
   describe "magic link record page" do
-    test "the holder of a magic link can still open their own record", %{conn: conn} do
+    test "a magic link at /users/<token> redirects to the login link", %{conn: conn} do
+      {:ok, user} = Nullzara.Users.create_magiclink_user(%{name: "magic user"})
+      token = user.raw_login_token
+
+      assert {:error, {:redirect, %{to: to}}} = live(conn, ~p"/users/#{token}")
+      assert to == ~p"/u/#{token}"
+    end
+
+    test "following that redirect signs the holder in", %{conn: conn} do
+      {:ok, user} = Nullzara.Users.create_magiclink_user(%{name: "magic user"})
+      token = user.raw_login_token
+
+      {:error, {:redirect, %{to: to}}} = live(conn, ~p"/users/#{token}")
+      conn = get(conn, to)
+
+      assert redirected_to(conn) == ~p"/user/#{token}/dashboard"
+      assert get_session(conn, :user_id) == user.id
+    end
+
+    test "an admin opening /users/<magic token> sees the record and stays themselves",
+         %{conn: conn} do
+      {admin, _token, _login_token} = user_fixture_with_token(%{name: "the admin"})
+      make_admin(admin)
+      conn = log_in_user(conn, admin)
       {:ok, user} = Nullzara.Users.create_magiclink_user(%{name: "magic user"})
 
       {:ok, _show_live, html} = live(conn, ~p"/users/#{user.raw_login_token}")
 
       assert html =~ "Show User"
       assert html =~ "magic user"
+      assert get_session(conn, :user_id) == admin.id
     end
 
     test "a login token of a non-magic-link account does not open the record", %{conn: conn} do

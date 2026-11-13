@@ -159,6 +159,16 @@ defmodule NullzaraWeb.TokenControllerTest do
       assert html =~ token
     end
 
+    test "the magic link shown on the welcome page is the login link", %{conn: conn} do
+      conn = post(conn, ~p"/magiclink")
+      assert "/u/" <> token = path = redirected_to(conn)
+
+      html = conn |> recycle() |> get(path) |> html_response(200)
+
+      assert html =~ "#{NullzaraWeb.Endpoint.url()}/u/#{token}"
+      refute html =~ "/users/#{token}"
+    end
+
     test "Done acknowledges the welcome page and login keeps working", %{conn: conn} do
       conn = post(conn, ~p"/magiclink")
       assert "/u/" <> token = path = redirected_to(conn)
