@@ -8,6 +8,14 @@ defmodule NullzaraWeb.PageControllerTest do
     assert html =~ "Create Anonymous Account"
   end
 
+  test "GET / names the theme buttons for assistive technology", %{conn: conn} do
+    html = conn |> get(~p"/") |> html_response(200)
+
+    for label <- ["Use system theme", "Use light theme", "Use dark theme"] do
+      assert html =~ ~s|aria-label="#{label}"|
+    end
+  end
+
   test "POST / creates an anonymous user and redirects to /u/:token", %{conn: conn} do
     conn = post(conn, ~p"/")
     assert "/u/" <> _token = redirected_to(conn)
