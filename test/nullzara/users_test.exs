@@ -33,6 +33,15 @@ defmodule Nullzara.UsersTest do
       assert "should be at most 50 character(s)" in errors_on(changeset).name
     end
 
+    test "update_user/2 rejects a name that fits in 50 graphemes but not in the column" do
+      user = user_fixture()
+      # A family emoji is one grapheme but seven code points: 50 of them is 350.
+      family = "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}"
+
+      assert {:error, changeset} = Users.update_user(user, %{name: String.duplicate(family, 50)})
+      assert "should be at most 50 character(s)" in errors_on(changeset).name
+    end
+
     test "update_user/2 accepts 50 characters, including multi-byte ones" do
       user = user_fixture()
       assert {:ok, _} = Users.update_user(user, %{name: String.duplicate("a", 50)})

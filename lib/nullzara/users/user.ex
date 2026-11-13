@@ -44,7 +44,8 @@ defmodule Nullzara.Users.User do
     user
     |> cast(attrs, [:name])
     |> validate_required([:name])
-    |> validate_length(:name, max: 50)
+    # Count code points, as Postgres does, so no name can overflow the column.
+    |> validate_length(:name, max: 50, count: :codepoints)
   end
 
   @doc false
