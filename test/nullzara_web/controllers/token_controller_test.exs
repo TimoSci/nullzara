@@ -55,6 +55,20 @@ defmodule NullzaraWeb.TokenControllerTest do
     end
   end
 
+  describe "GET /u/:token in upper case" do
+    test "accepts the login token in upper case", %{conn: conn} do
+      {user, _token, login_token} = user_fixture_with_token()
+      conn = get(conn, ~p"/u/#{String.upcase(login_token)}")
+      assert redirected_to(conn) == ~p"/user/#{user}/dashboard"
+    end
+
+    test "stores the mnemonic token in lower case", %{conn: conn} do
+      {_user, raw_token, _login_token} = user_fixture_with_token()
+      conn = get(conn, ~p"/u/#{String.upcase(raw_token)}")
+      assert get_session(conn, :mnemonic_token) == raw_token
+    end
+  end
+
   describe "GET /u/:token with mnemonic token" do
     test "redirects to dashboard with valid mnemonic token", %{conn: conn} do
       {user, mnemonic_token, _login_token} = user_fixture_with_token()

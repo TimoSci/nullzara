@@ -39,6 +39,21 @@ defmodule NullzaraWeb.AccessLiveTest do
       assert {:error, {:live_redirect, %{to: "/u/" <> _token}}} = result
     end
 
+    test "accepts a capitalised phrase with extra whitespace", %{conn: conn} do
+      {_user, raw_token, _login_token} = user_fixture_with_token()
+      phrase = raw_token |> Mnemonic.encode() |> String.upcase() |> String.replace(" ", "  \n ")
+
+      {:ok, live_view, _html} = live(conn, ~p"/access/mnemonic")
+
+      result =
+        live_view
+        |> form("#access-form", access: %{phrase: phrase})
+        |> render_submit()
+
+      assert {:error, {_kind, %{to: to}}} = result
+      assert String.starts_with?(to, "/u/" <> raw_token)
+    end
+
     test "shows error for wrong word count", %{conn: conn} do
       {:ok, live_view, _html} = live(conn, ~p"/access/mnemonic")
 

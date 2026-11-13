@@ -62,7 +62,7 @@ defmodule Nullzara.Users.Mnemonic do
 
   defp words_to_indices(words) do
     Enum.reduce_while(words, {:ok, []}, fn word, {:ok, acc} ->
-      case Map.fetch(@word_to_index, word) do
+      case Map.fetch(@word_to_index, String.downcase(word)) do
         {:ok, index} -> {:cont, {:ok, acc ++ [index]}}
         :error -> {:halt, {:error, :invalid_word}}
       end

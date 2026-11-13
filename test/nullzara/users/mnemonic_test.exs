@@ -33,6 +33,12 @@ defmodule Nullzara.Users.MnemonicTest do
       end
     end
 
+    test "decode/1 ignores case and extra whitespace" do
+      token = "00112233445566778899aabbccddeeff"
+      messy = token |> Mnemonic.encode() |> String.upcase() |> String.replace(" ", " \n  ")
+      assert Mnemonic.decode(messy) == {:ok, token}
+    end
+
     test "returns error for wrong word count" do
       assert {:error, :invalid_length} = Mnemonic.decode("one two three")
     end
