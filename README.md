@@ -65,6 +65,10 @@ Or start with an interactive shell:
 iex -S mix phx.server
 ```
 
+### Development admin
+
+`mix setup` seeds a default admin account for development (defined in `config/dev.exs`). Sign in at <http://localhost:4000/u/000000000000000000000000000000ad> to use the `/users` administration pages. On an existing database, create it with `mix run priv/repo/seeds.exs`. Setting `ADMIN_UUIDS` replaces the default admin list. The account exists only in development; other environments have no admins unless `ADMIN_UUIDS` is set.
+
 ### Running Tests
 
 ```bash

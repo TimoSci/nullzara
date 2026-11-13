@@ -100,5 +100,17 @@ config :nullzara, Nullzara.RateLimiter,
     verify: {100, :timer.minutes(10)}
   }
 
+# Default admin for development. `mix ecto.setup` (via priv/repo/seeds.exs)
+# creates this account, and it may use the /users administration pages.
+# Sign in at /u/<login_token>. Setting ADMIN_UUIDS replaces the admin list.
+# These credentials are public: never copy them into another environment.
+config :nullzara, :dev_admin,
+  uuid: "00000000-0000-4000-8000-000000000001",
+  name: "Dev Admin",
+  login_token: "000000000000000000000000000000ad",
+  mnemonic_token: "000000000000000000000000000000ae"
+
+config :nullzara, :admin_uuids, ["00000000-0000-4000-8000-000000000001"]
+
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false

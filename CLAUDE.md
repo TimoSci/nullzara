@@ -63,6 +63,10 @@ Read `AGENTS.md` for comprehensive Phoenix 1.8, LiveView, Ecto, HEEx, and Elixir
 - **Ecto**: always preload associations before template access; use `:string` type (not `:text`); never put security-sensitive fields in `cast`
 - **Tests**: use `start_supervised!/1` for processes, never `Process.sleep/1`; use `has_element?/2` and `element/2` for assertions, not raw HTML matching
 
+### Dev admin
+
+`config/dev.exs` defines a default admin (`:dev_admin`), created by `priv/repo/seeds.exs`. Sign in at `/u/000000000000000000000000000000ad` to reach the `/users` pages. Dev only; `ADMIN_UUIDS` replaces the list.
+
 ## Production
 
 Required env vars: `DATABASE_URL`, `SECRET_KEY_BASE`, `PHX_HOST`
