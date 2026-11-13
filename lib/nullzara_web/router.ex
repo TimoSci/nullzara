@@ -66,18 +66,24 @@ defmodule NullzaraWeb.Router do
 
     live_session :authenticated,
       on_mount: [{NullzaraWeb.Plugs.Auth, :require_authenticated_user}] do
+      live "/user/:id/settings/wallet", WalletSettingsLive
+    end
+
+    # User administration: only accounts listed in ADMIN_UUIDS.
+    live_session :admin,
+      on_mount: [{NullzaraWeb.Plugs.Auth, :require_admin}] do
       live "/users", UserLive.Index, :index
       live "/users/new", UserLive.Form, :new
       live "/users/:uuid/edit", UserLive.Form, :edit
-      live "/user/:id/settings/wallet", WalletSettingsLive
     end
   end
 
   scope "/", NullzaraWeb do
     pipe_through :browser
 
+    # Admins, or the holder of a magiclink token for that record.
     live_session :users_show,
-      on_mount: [{NullzaraWeb.Plugs.Auth, :require_authenticated_user}] do
+      on_mount: [{NullzaraWeb.Plugs.Auth, :require_admin_or_magiclink}] do
       live "/users/:id", UserLive.Show, :show
     end
   end

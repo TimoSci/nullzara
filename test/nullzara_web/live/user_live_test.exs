@@ -16,8 +16,13 @@ defmodule NullzaraWeb.UserLiveTest do
     %{conn: log_in_user(conn, user)}
   end
 
+  defp promote_to_admin(%{user: user}) do
+    make_admin(user)
+    :ok
+  end
+
   describe "Index" do
-    setup [:create_user, :authenticate]
+    setup [:create_user, :authenticate, :promote_to_admin]
 
     test "lists all users", %{conn: conn, user: user} do
       {:ok, _index_live, html} = live(conn, ~p"/users")
@@ -87,7 +92,7 @@ defmodule NullzaraWeb.UserLiveTest do
   end
 
   describe "Show" do
-    setup [:create_user, :authenticate]
+    setup [:create_user, :authenticate, :promote_to_admin]
 
     test "displays user", %{conn: conn, user: user} do
       {:ok, _show_live, html} = live(conn, ~p"/users/#{user}")
@@ -120,6 +125,76 @@ defmodule NullzaraWeb.UserLiveTest do
       html = render(show_live)
       assert html =~ "User updated successfully"
       assert html =~ "some updated name"
+    end
+  end
+
+  describe "as a signed-in user who is not an admin" do
+    setup [:create_user, :authenticate]
+
+    setup do
+      {other, _token, _login_token} = user_fixture_with_token(%{name: "other user"})
+      %{other: other}
+    end
+
+    test "the user list is off limits", %{conn: conn, user: user} do
+      assert {:error, {:redirect, %{to: to, flash: flash}}} = live(conn, ~p"/users")
+      assert to == ~p"/user/#{user}/dashboard"
+      assert flash["error"] =~ "not authorized"
+    end
+
+    test "creating users is off limits", %{conn: conn, user: user} do
+      assert {:error, {:redirect, %{to: to}}} = live(conn, ~p"/users/new")
+      assert to == ~p"/user/#{user}/dashboard"
+    end
+
+    test "editing another user is off limits", %{conn: conn, user: user, other: other} do
+      assert {:error, {:redirect, %{to: to}}} = live(conn, ~p"/users/#{other}/edit")
+      assert to == ~p"/user/#{user}/dashboard"
+      assert Nullzara.Users.get_user!(other.id).name == "other user"
+    end
+
+    test "editing their own record through the admin form is off limits",
+         %{conn: conn, user: user} do
+      assert {:error, {:redirect, %{to: to}}} = live(conn, ~p"/users/#{user}/edit")
+      assert to == ~p"/user/#{user}/dashboard"
+    end
+
+    test "viewing another user's record is off limits", %{conn: conn, user: user, other: other} do
+      assert {:error, {:redirect, %{to: to}}} = live(conn, ~p"/users/#{other}")
+      assert to == ~p"/user/#{user}/dashboard"
+    end
+  end
+
+  describe "as a visitor who is not signed in" do
+    setup [:create_user]
+
+    test "the admin pages redirect to the token login", %{conn: conn, user: user} do
+      for path <- [~p"/users", ~p"/users/new", ~p"/users/#{user}/edit", ~p"/users/#{user}"] do
+        assert {:error, {:redirect, %{to: "/access/token"}}} = live(conn, path)
+      end
+    end
+
+    test "being listed as an admin does not replace signing in", %{conn: conn, user: user} do
+      make_admin(user)
+      assert {:error, {:redirect, %{to: "/access/token"}}} = live(conn, ~p"/users")
+    end
+  end
+
+  describe "magic link record page" do
+    test "the holder of a magic link can still open their own record", %{conn: conn} do
+      {:ok, user} = Nullzara.Users.create_magiclink_user(%{name: "magic user"})
+
+      {:ok, _show_live, html} = live(conn, ~p"/users/#{user.raw_login_token}")
+
+      assert html =~ "Show User"
+      assert html =~ "magic user"
+    end
+
+    test "a login token of a non-magic-link account does not open the record", %{conn: conn} do
+      {_user, _token, login_token} = user_fixture_with_token()
+
+      assert {:error, {:redirect, %{to: "/access/token"}}} =
+               live(conn, ~p"/users/#{login_token}")
     end
   end
 end

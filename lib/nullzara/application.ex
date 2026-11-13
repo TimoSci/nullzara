@@ -7,6 +7,8 @@ defmodule Nullzara.Application do
 
   @impl true
   def start(_type, _args) do
+    normalize_admin_uuids()
+
     children = [
       NullzaraWeb.Telemetry,
       Nullzara.Repo,
@@ -21,6 +23,18 @@ defmodule Nullzara.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Nullzara.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  # ADMIN_UUIDS arrives from config/runtime.exs as the raw comma-separated
+  # string. Parse it once at boot so an invalid entry stops the app here.
+  defp normalize_admin_uuids do
+    case Application.get_env(:nullzara, :admin_uuids) do
+      value when is_binary(value) ->
+        Application.put_env(:nullzara, :admin_uuids, Nullzara.Users.parse_admin_uuids(value))
+
+      _ ->
+        :ok
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

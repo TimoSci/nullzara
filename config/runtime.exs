@@ -23,6 +23,12 @@ end
 config :nullzara, NullzaraWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# Comma-separated UUIDs of the accounts allowed to use the user
+# administration pages under /users. Unset means there are no admins.
+if admin_uuids = System.get_env("ADMIN_UUIDS") do
+  config :nullzara, :admin_uuids, admin_uuids
+end
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

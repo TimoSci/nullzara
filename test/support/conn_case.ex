@@ -44,4 +44,15 @@ defmodule NullzaraWeb.ConnCase do
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user_id, user.id)
   end
+
+  @doc """
+  Marks the given `user` as an admin for the duration of the test by
+  listing their UUID in the `:admin_uuids` application config.
+  """
+  def make_admin(user) do
+    previous = Application.get_env(:nullzara, :admin_uuids, [])
+    Application.put_env(:nullzara, :admin_uuids, [user.uuid | previous])
+    ExUnit.Callbacks.on_exit(fn -> Application.put_env(:nullzara, :admin_uuids, previous) end)
+    user
+  end
 end

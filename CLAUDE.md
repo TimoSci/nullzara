@@ -67,6 +67,8 @@ Read `AGENTS.md` for comprehensive Phoenix 1.8, LiveView, Ecto, HEEx, and Elixir
 
 Required env vars: `DATABASE_URL`, `SECRET_KEY_BASE`, `PHX_HOST`
 
+Optional: `ADMIN_UUIDS` — comma-separated account UUIDs allowed to use the `/users` administration pages (read in all environments; unset means no admins).
+
 ```bash
 mix assets.deploy                          # Minify + digest
 PHX_SERVER=true bin/nullzara start      # After mix release

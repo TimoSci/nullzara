@@ -90,6 +90,7 @@ Set the following environment variables:
 | `DATABASE_URL` | PostgreSQL connection string |
 | `SECRET_KEY_BASE` | 64+ byte secret for signing sessions and tokens |
 | `PHX_HOST` | Public hostname (e.g. `nullzara.example.com`) |
+| `ADMIN_UUIDS` | Optional. Comma-separated account UUIDs allowed to use the `/users` administration pages. Unset means nobody can. |
 
 ```bash
 mix assets.deploy                    # Minify + digest static assets

@@ -35,6 +35,40 @@ defmodule Nullzara.Users do
   def get_user(id), do: Repo.get(User, id)
 
   @doc """
+  Returns true if the user is an admin.
+
+  Admins are the accounts whose UUID is listed in the `ADMIN_UUIDS`
+  environment variable (see `parse_admin_uuids/1`). With no admins
+  configured, nobody is an admin.
+  """
+  def admin?(%User{uuid: uuid}) when is_binary(uuid) do
+    uuid in Application.get_env(:nullzara, :admin_uuids, [])
+  end
+
+  def admin?(_), do: false
+
+  @doc """
+  Parses the comma-separated `ADMIN_UUIDS` value into a list of UUIDs.
+
+  Raises `ArgumentError` on an entry that is not a UUID, so a typo fails
+  at boot instead of silently leaving the app without that admin.
+  """
+  def parse_admin_uuids(nil), do: []
+
+  def parse_admin_uuids(value) when is_binary(value) do
+    value
+    |> String.split(",")
+    |> Enum.map(&String.trim/1)
+    |> Enum.reject(&(&1 == ""))
+    |> Enum.map(fn entry ->
+      case Ecto.UUID.cast(entry) do
+        {:ok, uuid} -> uuid
+        :error -> raise ArgumentError, "ADMIN_UUIDS contains an invalid UUID: #{inspect(entry)}"
+      end
+    end)
+  end
+
+  @doc """
   Gets a user by raw token. Hashes the token and queries by token_hash or mnemonic_hash.
 
   Returns `{:ok, user, :token | :mnemonic}` or `{:error, :not_found}`.

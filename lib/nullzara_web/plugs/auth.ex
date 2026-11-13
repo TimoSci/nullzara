@@ -51,6 +51,57 @@ defmodule NullzaraWeb.Plugs.Auth do
     end
   end
 
+  # Admin-only pages (user list, create, edit).
+  def on_mount(:require_admin, _params, session, socket) do
+    socket = mount_current_user(socket, session)
+    user = socket.assigns.current_user
+
+    cond do
+      Users.admin?(user) -> {:cont, socket}
+      user -> {:halt, deny(socket, user)}
+      true -> {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
+    end
+  end
+
+  # The user record page. Admins may open any record. It is also the
+  # magic link target, so the holder of a magiclink login token may open
+  # the record that token belongs to.
+  def on_mount(:require_admin_or_magiclink, params, session, socket) do
+    socket = mount_current_user(socket, session)
+    user = socket.assigns.current_user
+
+    cond do
+      Users.admin?(user) ->
+        {:cont, socket}
+
+      magiclink_user = magiclink_user_for(params["id"]) ->
+        {:cont, Phoenix.Component.assign(socket, :current_user, user || magiclink_user)}
+
+      user ->
+        {:halt, deny(socket, user)}
+
+      true ->
+        {:halt, Phoenix.LiveView.redirect(socket, to: "/access/token")}
+    end
+  end
+
+  defp magiclink_user_for(token) when is_binary(token) do
+    with {:ok, user} <- Users.get_user_by_login_token(token),
+         true <- User.is_magiclink?(user) do
+      %{user | raw_login_token: token}
+    else
+      _ -> nil
+    end
+  end
+
+  defp magiclink_user_for(_), do: nil
+
+  defp deny(socket, user) do
+    socket
+    |> Phoenix.LiveView.put_flash(:error, "You are not authorized to view that page.")
+    |> Phoenix.LiveView.redirect(to: "/user/#{Phoenix.Param.to_param(user)}/dashboard")
+  end
+
   defp mount_current_user(socket, session) do
     assign_new(socket, :current_user, fn ->
       user_id = session["user_id"]

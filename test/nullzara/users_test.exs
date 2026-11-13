@@ -96,4 +96,52 @@ defmodule Nullzara.UsersTest do
       assert {:ok, _user, :mnemonic} = Users.get_user_by_token(mnemonic_token)
     end
   end
+
+  describe "admin?/1" do
+    import Nullzara.UsersFixtures
+
+    setup do
+      previous = Application.get_env(:nullzara, :admin_uuids, [])
+      on_exit(fn -> Application.put_env(:nullzara, :admin_uuids, previous) end)
+      :ok
+    end
+
+    test "is true only for users whose UUID is configured" do
+      admin = user_fixture()
+      other = user_fixture()
+      Application.put_env(:nullzara, :admin_uuids, [admin.uuid])
+
+      assert Nullzara.Users.admin?(admin)
+      refute Nullzara.Users.admin?(other)
+    end
+
+    test "is false for everyone when no admins are configured" do
+      Application.put_env(:nullzara, :admin_uuids, [])
+
+      refute Nullzara.Users.admin?(user_fixture())
+      refute Nullzara.Users.admin?(nil)
+    end
+  end
+
+  describe "parse_admin_uuids/1" do
+    test "splits a comma-separated list, trimming blanks and normalising case" do
+      assert Nullzara.Users.parse_admin_uuids(
+               " 486CD7FE-5521-421F-A591-219103C0830C ,, 5f3ae4f5-d40b-422e-916c-3969c86fadce "
+             ) == [
+               "486cd7fe-5521-421f-a591-219103c0830c",
+               "5f3ae4f5-d40b-422e-916c-3969c86fadce"
+             ]
+    end
+
+    test "returns an empty list for nil or an empty string" do
+      assert Nullzara.Users.parse_admin_uuids(nil) == []
+      assert Nullzara.Users.parse_admin_uuids("") == []
+    end
+
+    test "raises on an entry that is not a UUID" do
+      assert_raise ArgumentError, ~r/ADMIN_UUIDS/, fn ->
+        Nullzara.Users.parse_admin_uuids("not-a-uuid")
+      end
+    end
+  end
 end
