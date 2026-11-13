@@ -23,9 +23,11 @@ defmodule Nullzara.Users.User do
     )
   end
 
-  def slug(%__MODULE__{mnemonic_hash: nil, token_hash: hash}) when is_binary(hash) do
+  # Magic-link accounts have no mnemonic. Seed from the UUID, which never
+  # changes, so regenerating the login token keeps the same slug.
+  def slug(%__MODULE__{mnemonic_hash: nil, uuid: uuid}) when is_binary(uuid) do
     UniqueNamesGenerator.generate([:adjectives, :animals, :names],
-      seed: hash,
+      seed: uuid,
       separator: "-"
     )
   end

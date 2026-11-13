@@ -39,6 +39,20 @@ defmodule Nullzara.UsersTest do
       assert {:ok, _} = Users.update_user(user, %{name: String.duplicate("🙂", 50)})
     end
 
+    test "a magic-link user's slug survives regenerating the login token" do
+      {:ok, user} = Users.create_magiclink_user(%{name: "m"})
+      {:ok, updated} = Users.regenerate_login_token(user)
+
+      assert User.slug(updated) == User.slug(user)
+    end
+
+    test "different magic-link users get different slugs" do
+      {:ok, one} = Users.create_magiclink_user(%{name: "m"})
+      {:ok, two} = Users.create_magiclink_user(%{name: "m"})
+
+      refute User.slug(one) == User.slug(two)
+    end
+
     test "create_user/1 with invalid data returns error changeset" do
       assert {:error, %Ecto.Changeset{}} = Users.create_user(@invalid_attrs)
     end

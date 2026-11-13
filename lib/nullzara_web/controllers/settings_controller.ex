@@ -35,9 +35,16 @@ defmodule NullzaraWeb.SettingsController do
 
     case Users.regenerate_login_token(user) do
       {:ok, updated_user} ->
+        # A magic-link user is addressed by their login token in URLs, so
+        # the session has to follow the new token.
+        conn =
+          if Users.User.is_magiclink?(updated_user),
+            do: put_session(conn, :login_token, updated_user.raw_login_token),
+            else: conn
+
         conn
         |> put_flash(:new_login_token, updated_user.raw_login_token)
-        |> redirect(to: ~p"/user/#{user}/settings")
+        |> redirect(to: ~p"/user/#{updated_user}/settings")
 
       {:error, _changeset} ->
         conn

@@ -110,6 +110,41 @@ defmodule NullzaraWeb.SettingsControllerTest do
     end
   end
 
+  describe "POST /user/:id/settings/token as a magic-link user" do
+    setup %{conn: conn} do
+      {:ok, user} = Nullzara.Users.create_magiclink_user(%{name: "magic"})
+      token = user.raw_login_token
+      conn = conn |> get(~p"/u/#{token}") |> recycle()
+      %{conn: conn, old_token: token, magic_user: user}
+    end
+
+    test "the session follows the new token", %{conn: conn, old_token: old_token} do
+      conn = post(conn, ~p"/user/#{old_token}/settings/token")
+      new_token = get_session(conn, :login_token)
+
+      assert new_token != old_token
+      assert Phoenix.Flash.get(conn.assigns.flash, :new_login_token) == new_token
+      assert redirected_to(conn) == ~p"/user/#{new_token}/settings"
+    end
+
+    test "regenerating twice keeps the user signed in with working links",
+         %{conn: conn, old_token: old_token, magic_user: user} do
+      conn = post(conn, ~p"/user/#{old_token}/settings/token")
+      new_token = get_session(conn, :login_token)
+
+      conn = post(recycle(conn), ~p"/user/#{new_token}/settings/token")
+      newest = get_session(conn, :login_token)
+      refute newest in [old_token, new_token]
+
+      conn = get(recycle(conn), ~p"/user/#{newest}/settings")
+      html = html_response(conn, 200)
+      assert html =~ ~s|href="/user/#{newest}/settings"|
+      refute html =~ old_token
+      refute html =~ new_token
+      assert get_session(conn, :user_id) == user.id
+    end
+  end
+
   describe "DELETE /user/:id/settings" do
     test "deletes the account and redirects to home", %{conn: conn, user: user} do
       conn =
