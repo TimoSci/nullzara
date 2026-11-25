@@ -2,6 +2,7 @@ defmodule NullzaraWeb.WalletLive do
   use NullzaraWeb, :live_view
 
   alias Nullzara.Wallet
+  alias NullzaraWeb.WalletComponents
 
   @nonce_max_age_ms 120_000
 
@@ -15,82 +16,22 @@ defmodule NullzaraWeb.WalletLive do
           <:subtitle>Use an Ethereum wallet to sign in or create an account.</:subtitle>
         </.header>
 
-        <div id="wallet-auth" phx-hook=".WalletHook" class="space-y-4">
-          <div class="flex flex-col gap-4 items-center">
-            <.button
-              id="wallet-connect-btn"
-              variant="primary"
-              phx-click="connect_wallet"
-              disabled={@loading}
-            >
-              <.icon name="hero-wallet-mini" /> Sign in with Wallet
-            </.button>
-          </div>
-
-          <p :if={@loading} class="text-center text-sm opacity-70">
-            Waiting for wallet...
-          </p>
-
-          <p :if={@error} class="text-center text-sm text-error">
-            {@error}
-          </p>
-        </div>
+        <WalletComponents.wallet_connector
+          id="wallet-auth"
+          wallets={@wallets}
+          loading={@loading}
+          error={@error}
+        >
+          <.button
+            id="wallet-connect-btn"
+            variant="primary"
+            phx-click="connect_wallet"
+            disabled={@loading}
+          >
+            <.icon name="hero-wallet-mini" /> Sign in with Wallet
+          </.button>
+        </WalletComponents.wallet_connector>
       </div>
-
-      <script :type={Phoenix.LiveView.ColocatedHook} name=".WalletHook">
-        export default {
-          mounted() {
-            this.handleEvent("request_accounts", async (_data) => {
-              try {
-                if (!window.ethereum) {
-                  this.pushEvent("wallet_error", {
-                    message: "No wallet detected. Install MetaMask or another Ethereum wallet."
-                  });
-                  return;
-                }
-
-                const accounts = await window.ethereum.request({
-                  method: "eth_requestAccounts"
-                });
-
-                if (accounts.length === 0) {
-                  this.pushEvent("wallet_error", { message: "No accounts found." });
-                  return;
-                }
-
-                this.pushEvent("wallet_connected", { address: accounts[0] });
-              } catch (e) {
-                this.pushEvent("wallet_error", {
-                  message: e.message || "Wallet connection cancelled"
-                });
-              }
-            });
-
-            if (window.ethereum) {
-              window.ethereum.on("accountsChanged", (accounts) => {
-                if (accounts.length > 0) {
-                  this.pushEvent("wallet_connected", { address: accounts[0] });
-                }
-              });
-            }
-
-            this.handleEvent("sign_message", async (data) => {
-              try {
-                const signature = await window.ethereum.request({
-                  method: "personal_sign",
-                  params: [data.message, data.address]
-                });
-
-                this.pushEvent("message_signed", { signature: signature });
-              } catch (e) {
-                this.pushEvent("wallet_error", {
-                  message: e.message || "Signing cancelled"
-                });
-              }
-            });
-          }
-        }
-      </script>
     </Layouts.app>
     """
   end
@@ -102,6 +43,7 @@ defmodule NullzaraWeb.WalletLive do
      |> assign(:page_title, "Wallet Login")
      |> assign(:loading, false)
      |> assign(:error, nil)
+     |> assign(:wallets, [])
      |> assign(:nonce, nil)
      |> assign(:nonce_issued_at, nil)
      |> assign(:address, nil)}
@@ -113,9 +55,40 @@ defmodule NullzaraWeb.WalletLive do
       socket
       |> assign(:loading, true)
       |> assign(:error, nil)
+      |> assign(:wallets, [])
       |> push_event("request_accounts", %{})
 
     {:noreply, socket}
+  end
+
+  # The browser found more than one wallet extension: let the visitor choose.
+  def handle_event("wallets_found", params, socket) do
+    case WalletComponents.normalize_wallets(params) do
+      [] ->
+        {:noreply,
+         socket
+         |> assign(:loading, false)
+         |> assign(:error, WalletComponents.no_wallet_message())}
+
+      wallets ->
+        {:noreply,
+         socket
+         |> assign(:loading, false)
+         |> assign(:wallets, wallets)}
+    end
+  end
+
+  def handle_event("choose_wallet", %{"id" => id}, socket) do
+    if Enum.any?(socket.assigns.wallets, &(&1.id == id)) do
+      {:noreply,
+       socket
+       |> assign(:loading, true)
+       |> assign(:error, nil)
+       |> assign(:wallets, [])
+       |> push_event("request_accounts", %{wallet: id})}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("wallet_connected", %{"address" => address}, socket) do
@@ -183,6 +156,7 @@ defmodule NullzaraWeb.WalletLive do
     {:noreply,
      socket
      |> assign(:loading, false)
+     |> assign(:wallets, [])
      |> assign(:error, message)}
   end
 end

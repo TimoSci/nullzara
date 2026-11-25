@@ -55,5 +55,22 @@ defmodule NullzaraWeb.WalletSettingsLiveTest do
 
       assert Process.alive?(view.pid)
     end
+
+    test "several wallets are offered and the chosen one is used", %{conn: conn, user: user} do
+      {:ok, view, _html} = live(conn, ~p"/user/#{user}/settings/wallet")
+
+      render_hook(view, "wallets_found", %{
+        "wallets" => [
+          %{"id" => "uuid-1", "name" => "MetaMask", "icon" => nil},
+          %{"id" => "uuid-2", "name" => "Enkrypt", "icon" => nil}
+        ]
+      })
+
+      assert has_element?(view, "#wallet-settings-choose-0", "MetaMask")
+
+      view |> element("#wallet-settings-choose-1") |> render_click()
+
+      assert_push_event(view, "request_accounts", %{wallet: "uuid-2"})
+    end
   end
 end
